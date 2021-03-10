@@ -11,6 +11,25 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /manager/class/{ma}:
+    get:
+      tags:
+      - manager
+      description: get user by uid
+      operationId: ManagerController.GetClass
+      parameters:
+      - in: path
+        name: ma
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.LopHocPhan'
+        "403":
+          description: :uid is empty
   /manager/class/add-student/{ma_lop}:
     put:
       tags:
@@ -111,12 +130,29 @@ paths:
             $ref: '#/definitions/models.SinhVienSlices'
         "403":
           description: :uid is empty
-  /manager/class/get/{ma}:
+  /manager/class/search/{key}:
+    get:
+      tags:
+      - manager
+      description: create users
+      operationId: ManagerController.SearchStudent
+      parameters:
+      - in: path
+        name: key
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} models.SinhVienSlices'
+        "403":
+          description: body is empty
+  /manager/student/{ma}:
     get:
       tags:
       - manager
       description: get user by uid
-      operationId: ManagerController.GetClass
+      operationId: ManagerController.GetStudent
       parameters:
       - in: path
         name: ma
@@ -127,9 +163,9 @@ paths:
         "200":
           description: ""
           schema:
-            $ref: '#/definitions/models.LopHocPhan'
+            $ref: '#/definitions/models.SinhVien'
         "403":
-          description: :uid is empty
+          description: :ma is empty
   /manager/student/create:
     post:
       tags:
@@ -165,25 +201,6 @@ paths:
           description: '{int} models.SinhVien[Ma]'
         "403":
           description: body is empty
-  /manager/student/get/{ma}:
-    get:
-      tags:
-      - manager
-      description: get user by uid
-      operationId: ManagerController.GetStudent
-      parameters:
-      - in: path
-        name: ma
-        description: The key for staticblock
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.SinhVien'
-        "403":
-          description: :ma is empty
   /user/:
     get:
       tags:
@@ -303,8 +320,8 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  models.&{245 SinhVien}:
-    title: '&{245 SinhVien}'
+  models.&{277 SinhVien}:
+    title: '&{277 SinhVien}'
     type: object
   models.LopHocPhan:
     title: LopHocPhan
@@ -350,7 +367,7 @@ definitions:
     title: SinhVienSlices
     type: array
     items:
-      $ref: '#/definitions/models.&{245 SinhVien}'
+      $ref: '#/definitions/models.&{277 SinhVien}'
   models.User:
     title: User
     type: object

@@ -38,4 +38,5 @@ service ManagerStudent{
     i32 existsSinhVien(1:string maSV),
     SinhVien getSinhVien(1:string maSV),
     i32 delSinhVien(1:string maSV)
+    SinhVienSlices searchSinhVien(1:string key)
 }

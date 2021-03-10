@@ -294,3 +294,23 @@ func (p *ManagerStudentHandler) DelSinhVien(ctx context.Context, maSV string) (r
 		return -1, err
 	}
 }
+
+func (p *ManagerStudentHandler) SearchSinhVien(ctx context.Context, key string) (r apiservice.SinhVienSlices, err error) {
+	keyEnd := []byte(key)
+	keyEnd[len(keyEnd)-1] += 1
+	log.Println("key: ", []byte(key))
+	log.Println("keyEnd : ", keyEnd)
+	re, err := client.BsRangeQuery(ctx, "SinhVien", []byte(key), keyEnd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var dsv = apiservice.SinhVienSlices{}
+	for _, i := range re.Items.Items {
+		var sv *apiservice.SinhVien
+		if err := json.Unmarshal(i.Value, &sv); err != nil {
+			log.Fatal(err)
+		}
+		dsv = append(dsv, sv)
+	}
+	return dsv, err
+}

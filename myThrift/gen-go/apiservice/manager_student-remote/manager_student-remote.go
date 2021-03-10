@@ -4,380 +4,391 @@
 package main
 
 import (
+	"apiservice"
 	"context"
 	"flag"
 	"fmt"
+	"github.com/apache/thrift/lib/go/thrift"
 	"math"
 	"net"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
-	"github.com/apache/thrift/lib/go/thrift"
-	"apiservice"
 )
 
 var _ = apiservice.GoUnusedProtection__
 
 func Usage() {
-  fmt.Fprintln(os.Stderr, "Usage of ", os.Args[0], " [-h host:port] [-u url] [-f[ramed]] function [arg1 [arg2...]]:")
-  flag.PrintDefaults()
-  fmt.Fprintln(os.Stderr, "\nFunctions:")
-  fmt.Fprintln(os.Stderr, "  void init()")
-  fmt.Fprintln(os.Stderr, "  i32 putLopHP(LopHocPhan lopHP)")
-  fmt.Fprintln(os.Stderr, "  i32 addSinhVienVaoLop(SinhVien sv, string maLHP)")
-  fmt.Fprintln(os.Stderr, "  i32 addSinhVienSlicesVaoLop(SinhVienSlices lsv, string maLHP)")
-  fmt.Fprintln(os.Stderr, "  i32 existsLopHP(string maLHP)")
-  fmt.Fprintln(os.Stderr, "  i32 existsSinhVienTrongLop(string maLHP, string maSinhVien)")
-  fmt.Fprintln(os.Stderr, "  LopHocPhan getLopHocPhan(string ma)")
-  fmt.Fprintln(os.Stderr, "  LopHocPhanSlices getLopHocPhanSlice()")
-  fmt.Fprintln(os.Stderr, "  SinhVienSlices getSinhVienLHP(string maLHP)")
-  fmt.Fprintln(os.Stderr, "  i32 delLopHP(string maLHP)")
-  fmt.Fprintln(os.Stderr, "  i32 putSVOutLopHP(string maLHP, string maSV)")
-  fmt.Fprintln(os.Stderr, "  i32 putSinhVien(SinhVien sv)")
-  fmt.Fprintln(os.Stderr, "  i32 existsSinhVien(string maSV)")
-  fmt.Fprintln(os.Stderr, "  SinhVien getSinhVien(string maSV)")
-  fmt.Fprintln(os.Stderr, "  i32 delSinhVien(string maSV)")
-  fmt.Fprintln(os.Stderr)
-  os.Exit(0)
+	fmt.Fprintln(os.Stderr, "Usage of ", os.Args[0], " [-h host:port] [-u url] [-f[ramed]] function [arg1 [arg2...]]:")
+	flag.PrintDefaults()
+	fmt.Fprintln(os.Stderr, "\nFunctions:")
+	fmt.Fprintln(os.Stderr, "  void init()")
+	fmt.Fprintln(os.Stderr, "  i32 putLopHP(LopHocPhan lopHP)")
+	fmt.Fprintln(os.Stderr, "  i32 addSinhVienVaoLop(SinhVien sv, string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 addSinhVienSlicesVaoLop(SinhVienSlices lsv, string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 existsLopHP(string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 existsSinhVienTrongLop(string maLHP, string maSinhVien)")
+	fmt.Fprintln(os.Stderr, "  LopHocPhan getLopHocPhan(string ma)")
+	fmt.Fprintln(os.Stderr, "  LopHocPhanSlices getLopHocPhanSlice()")
+	fmt.Fprintln(os.Stderr, "  SinhVienSlices getSinhVienLHP(string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 delLopHP(string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 putSVOutLopHP(string maLHP, string maSV)")
+	fmt.Fprintln(os.Stderr, "  i32 putSinhVien(SinhVien sv)")
+	fmt.Fprintln(os.Stderr, "  i32 existsSinhVien(string maSV)")
+	fmt.Fprintln(os.Stderr, "  SinhVien getSinhVien(string maSV)")
+	fmt.Fprintln(os.Stderr, "  i32 delSinhVien(string maSV)")
+	fmt.Fprintln(os.Stderr, "  SinhVienSlices searchSinhVien(string key)")
+	fmt.Fprintln(os.Stderr)
+	os.Exit(0)
 }
 
 type httpHeaders map[string]string
 
 func (h httpHeaders) String() string {
-  var m map[string]string = h
-  return fmt.Sprintf("%s", m)
+	var m map[string]string = h
+	return fmt.Sprintf("%s", m)
 }
 
 func (h httpHeaders) Set(value string) error {
-  parts := strings.Split(value, ": ")
-  if len(parts) != 2 {
-    return fmt.Errorf("header should be of format 'Key: Value'")
-  }
-  h[parts[0]] = parts[1]
-  return nil
+	parts := strings.Split(value, ": ")
+	if len(parts) != 2 {
+		return fmt.Errorf("header should be of format 'Key: Value'")
+	}
+	h[parts[0]] = parts[1]
+	return nil
 }
 
 func main() {
-  flag.Usage = Usage
-  var host string
-  var port int
-  var protocol string
-  var urlString string
-  var framed bool
-  var useHttp bool
-  headers := make(httpHeaders)
-  var parsedUrl *url.URL
-  var trans thrift.TTransport
-  _ = strconv.Atoi
-  _ = math.Abs
-  flag.Usage = Usage
-  flag.StringVar(&host, "h", "localhost", "Specify host and port")
-  flag.IntVar(&port, "p", 9090, "Specify port")
-  flag.StringVar(&protocol, "P", "binary", "Specify the protocol (binary, compact, simplejson, json)")
-  flag.StringVar(&urlString, "u", "", "Specify the url")
-  flag.BoolVar(&framed, "framed", false, "Use framed transport")
-  flag.BoolVar(&useHttp, "http", false, "Use http")
-  flag.Var(headers, "H", "Headers to set on the http(s) request (e.g. -H \"Key: Value\")")
-  flag.Parse()
-  
-  if len(urlString) > 0 {
-    var err error
-    parsedUrl, err = url.Parse(urlString)
-    if err != nil {
-      fmt.Fprintln(os.Stderr, "Error parsing URL: ", err)
-      flag.Usage()
-    }
-    host = parsedUrl.Host
-    useHttp = len(parsedUrl.Scheme) <= 0 || parsedUrl.Scheme == "http" || parsedUrl.Scheme == "https"
-  } else if useHttp {
-    _, err := url.Parse(fmt.Sprint("http://", host, ":", port))
-    if err != nil {
-      fmt.Fprintln(os.Stderr, "Error parsing URL: ", err)
-      flag.Usage()
-    }
-  }
-  
-  cmd := flag.Arg(0)
-  var err error
-  if useHttp {
-    trans, err = thrift.NewTHttpClient(parsedUrl.String())
-    if len(headers) > 0 {
-      httptrans := trans.(*thrift.THttpClient)
-      for key, value := range headers {
-        httptrans.SetHeader(key, value)
-      }
-    }
-  } else {
-    portStr := fmt.Sprint(port)
-    if strings.Contains(host, ":") {
-           host, portStr, err = net.SplitHostPort(host)
-           if err != nil {
-                   fmt.Fprintln(os.Stderr, "error with host:", err)
-                   os.Exit(1)
-           }
-    }
-    trans, err = thrift.NewTSocket(net.JoinHostPort(host, portStr))
-    if err != nil {
-      fmt.Fprintln(os.Stderr, "error resolving address:", err)
-      os.Exit(1)
-    }
-    if framed {
-      trans = thrift.NewTFramedTransport(trans)
-    }
-  }
-  if err != nil {
-    fmt.Fprintln(os.Stderr, "Error creating transport", err)
-    os.Exit(1)
-  }
-  defer trans.Close()
-  var protocolFactory thrift.TProtocolFactory
-  switch protocol {
-  case "compact":
-    protocolFactory = thrift.NewTCompactProtocolFactory()
-    break
-  case "simplejson":
-    protocolFactory = thrift.NewTSimpleJSONProtocolFactory()
-    break
-  case "json":
-    protocolFactory = thrift.NewTJSONProtocolFactory()
-    break
-  case "binary", "":
-    protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
-    break
-  default:
-    fmt.Fprintln(os.Stderr, "Invalid protocol specified: ", protocol)
-    Usage()
-    os.Exit(1)
-  }
-  iprot := protocolFactory.GetProtocol(trans)
-  oprot := protocolFactory.GetProtocol(trans)
-  client := apiservice.NewManagerStudentClient(thrift.NewTStandardClient(iprot, oprot))
-  if err := trans.Open(); err != nil {
-    fmt.Fprintln(os.Stderr, "Error opening socket to ", host, ":", port, " ", err)
-    os.Exit(1)
-  }
-  
-  switch cmd {
-  case "init":
-    if flag.NArg() - 1 != 0 {
-      fmt.Fprintln(os.Stderr, "Init requires 0 args")
-      flag.Usage()
-    }
-    fmt.Print(client.Init(context.Background()))
-    fmt.Print("\n")
-    break
-  case "putLopHP":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "PutLopHP requires 1 args")
-      flag.Usage()
-    }
-    arg36 := flag.Arg(1)
-    mbTrans37 := thrift.NewTMemoryBufferLen(len(arg36))
-    defer mbTrans37.Close()
-    _, err38 := mbTrans37.WriteString(arg36)
-    if err38 != nil {
-      Usage()
-      return
-    }
-    factory39 := thrift.NewTJSONProtocolFactory()
-    jsProt40 := factory39.GetProtocol(mbTrans37)
-    argvalue0 := apiservice.NewLopHocPhan()
-    err41 := argvalue0.Read(jsProt40)
-    if err41 != nil {
-      Usage()
-      return
-    }
-    value0 := argvalue0
-    fmt.Print(client.PutLopHP(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "addSinhVienVaoLop":
-    if flag.NArg() - 1 != 2 {
-      fmt.Fprintln(os.Stderr, "AddSinhVienVaoLop requires 2 args")
-      flag.Usage()
-    }
-    arg42 := flag.Arg(1)
-    mbTrans43 := thrift.NewTMemoryBufferLen(len(arg42))
-    defer mbTrans43.Close()
-    _, err44 := mbTrans43.WriteString(arg42)
-    if err44 != nil {
-      Usage()
-      return
-    }
-    factory45 := thrift.NewTJSONProtocolFactory()
-    jsProt46 := factory45.GetProtocol(mbTrans43)
-    argvalue0 := apiservice.NewSinhVien()
-    err47 := argvalue0.Read(jsProt46)
-    if err47 != nil {
-      Usage()
-      return
-    }
-    value0 := argvalue0
-    argvalue1 := flag.Arg(2)
-    value1 := argvalue1
-    fmt.Print(client.AddSinhVienVaoLop(context.Background(), value0, value1))
-    fmt.Print("\n")
-    break
-  case "addSinhVienSlicesVaoLop":
-    if flag.NArg() - 1 != 2 {
-      fmt.Fprintln(os.Stderr, "AddSinhVienSlicesVaoLop requires 2 args")
-      flag.Usage()
-    }
-    arg49 := flag.Arg(1)
-    mbTrans50 := thrift.NewTMemoryBufferLen(len(arg49))
-    defer mbTrans50.Close()
-    _, err51 := mbTrans50.WriteString(arg49)
-    if err51 != nil { 
-      Usage()
-      return
-    }
-    factory52 := thrift.NewTJSONProtocolFactory()
-    jsProt53 := factory52.GetProtocol(mbTrans50)
-    containerStruct0 := apiservice.NewManagerStudentAddSinhVienSlicesVaoLopArgs()
-    err54 := containerStruct0.ReadField1(jsProt53)
-    if err54 != nil {
-      Usage()
-      return
-    }
-    argvalue0 := containerStruct0.Lsv
-    value0 := apiservice.SinhVienSlices(argvalue0)
-    argvalue1 := flag.Arg(2)
-    value1 := argvalue1
-    fmt.Print(client.AddSinhVienSlicesVaoLop(context.Background(), value0, value1))
-    fmt.Print("\n")
-    break
-  case "existsLopHP":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "ExistsLopHP requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.ExistsLopHP(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "existsSinhVienTrongLop":
-    if flag.NArg() - 1 != 2 {
-      fmt.Fprintln(os.Stderr, "ExistsSinhVienTrongLop requires 2 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    argvalue1 := flag.Arg(2)
-    value1 := argvalue1
-    fmt.Print(client.ExistsSinhVienTrongLop(context.Background(), value0, value1))
-    fmt.Print("\n")
-    break
-  case "getLopHocPhan":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "GetLopHocPhan requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.GetLopHocPhan(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "getLopHocPhanSlice":
-    if flag.NArg() - 1 != 0 {
-      fmt.Fprintln(os.Stderr, "GetLopHocPhanSlice requires 0 args")
-      flag.Usage()
-    }
-    fmt.Print(client.GetLopHocPhanSlice(context.Background()))
-    fmt.Print("\n")
-    break
-  case "getSinhVienLHP":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "GetSinhVienLHP requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.GetSinhVienLHP(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "delLopHP":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "DelLopHP requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.DelLopHP(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "putSVOutLopHP":
-    if flag.NArg() - 1 != 2 {
-      fmt.Fprintln(os.Stderr, "PutSVOutLopHP requires 2 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    argvalue1 := flag.Arg(2)
-    value1 := argvalue1
-    fmt.Print(client.PutSVOutLopHP(context.Background(), value0, value1))
-    fmt.Print("\n")
-    break
-  case "putSinhVien":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "PutSinhVien requires 1 args")
-      flag.Usage()
-    }
-    arg64 := flag.Arg(1)
-    mbTrans65 := thrift.NewTMemoryBufferLen(len(arg64))
-    defer mbTrans65.Close()
-    _, err66 := mbTrans65.WriteString(arg64)
-    if err66 != nil {
-      Usage()
-      return
-    }
-    factory67 := thrift.NewTJSONProtocolFactory()
-    jsProt68 := factory67.GetProtocol(mbTrans65)
-    argvalue0 := apiservice.NewSinhVien()
-    err69 := argvalue0.Read(jsProt68)
-    if err69 != nil {
-      Usage()
-      return
-    }
-    value0 := argvalue0
-    fmt.Print(client.PutSinhVien(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "existsSinhVien":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "ExistsSinhVien requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.ExistsSinhVien(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "getSinhVien":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "GetSinhVien requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.GetSinhVien(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "delSinhVien":
-    if flag.NArg() - 1 != 1 {
-      fmt.Fprintln(os.Stderr, "DelSinhVien requires 1 args")
-      flag.Usage()
-    }
-    argvalue0 := flag.Arg(1)
-    value0 := argvalue0
-    fmt.Print(client.DelSinhVien(context.Background(), value0))
-    fmt.Print("\n")
-    break
-  case "":
-    Usage()
-    break
-  default:
-    fmt.Fprintln(os.Stderr, "Invalid function ", cmd)
-  }
+	flag.Usage = Usage
+	var host string
+	var port int
+	var protocol string
+	var urlString string
+	var framed bool
+	var useHttp bool
+	headers := make(httpHeaders)
+	var parsedUrl *url.URL
+	var trans thrift.TTransport
+	_ = strconv.Atoi
+	_ = math.Abs
+	flag.Usage = Usage
+	flag.StringVar(&host, "h", "localhost", "Specify host and port")
+	flag.IntVar(&port, "p", 9090, "Specify port")
+	flag.StringVar(&protocol, "P", "binary", "Specify the protocol (binary, compact, simplejson, json)")
+	flag.StringVar(&urlString, "u", "", "Specify the url")
+	flag.BoolVar(&framed, "framed", false, "Use framed transport")
+	flag.BoolVar(&useHttp, "http", false, "Use http")
+	flag.Var(headers, "H", "Headers to set on the http(s) request (e.g. -H \"Key: Value\")")
+	flag.Parse()
+
+	if len(urlString) > 0 {
+		var err error
+		parsedUrl, err = url.Parse(urlString)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error parsing URL: ", err)
+			flag.Usage()
+		}
+		host = parsedUrl.Host
+		useHttp = len(parsedUrl.Scheme) <= 0 || parsedUrl.Scheme == "http" || parsedUrl.Scheme == "https"
+	} else if useHttp {
+		_, err := url.Parse(fmt.Sprint("http://", host, ":", port))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error parsing URL: ", err)
+			flag.Usage()
+		}
+	}
+
+	cmd := flag.Arg(0)
+	var err error
+	if useHttp {
+		trans, err = thrift.NewTHttpClient(parsedUrl.String())
+		if len(headers) > 0 {
+			httptrans := trans.(*thrift.THttpClient)
+			for key, value := range headers {
+				httptrans.SetHeader(key, value)
+			}
+		}
+	} else {
+		portStr := fmt.Sprint(port)
+		if strings.Contains(host, ":") {
+			host, portStr, err = net.SplitHostPort(host)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error with host:", err)
+				os.Exit(1)
+			}
+		}
+		trans, err = thrift.NewTSocket(net.JoinHostPort(host, portStr))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "error resolving address:", err)
+			os.Exit(1)
+		}
+		if framed {
+			trans = thrift.NewTFramedTransport(trans)
+		}
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating transport", err)
+		os.Exit(1)
+	}
+	defer trans.Close()
+	var protocolFactory thrift.TProtocolFactory
+	switch protocol {
+	case "compact":
+		protocolFactory = thrift.NewTCompactProtocolFactory()
+		break
+	case "simplejson":
+		protocolFactory = thrift.NewTSimpleJSONProtocolFactory()
+		break
+	case "json":
+		protocolFactory = thrift.NewTJSONProtocolFactory()
+		break
+	case "binary", "":
+		protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
+		break
+	default:
+		fmt.Fprintln(os.Stderr, "Invalid protocol specified: ", protocol)
+		Usage()
+		os.Exit(1)
+	}
+	iprot := protocolFactory.GetProtocol(trans)
+	oprot := protocolFactory.GetProtocol(trans)
+	client := apiservice.NewManagerStudentClient(thrift.NewTStandardClient(iprot, oprot))
+	if err := trans.Open(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error opening socket to ", host, ":", port, " ", err)
+		os.Exit(1)
+	}
+
+	switch cmd {
+	case "init":
+		if flag.NArg()-1 != 0 {
+			fmt.Fprintln(os.Stderr, "Init requires 0 args")
+			flag.Usage()
+		}
+		fmt.Print(client.Init(context.Background()))
+		fmt.Print("\n")
+		break
+	case "putLopHP":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "PutLopHP requires 1 args")
+			flag.Usage()
+		}
+		arg39 := flag.Arg(1)
+		mbTrans40 := thrift.NewTMemoryBufferLen(len(arg39))
+		defer mbTrans40.Close()
+		_, err41 := mbTrans40.WriteString(arg39)
+		if err41 != nil {
+			Usage()
+			return
+		}
+		factory42 := thrift.NewTJSONProtocolFactory()
+		jsProt43 := factory42.GetProtocol(mbTrans40)
+		argvalue0 := apiservice.NewLopHocPhan()
+		err44 := argvalue0.Read(jsProt43)
+		if err44 != nil {
+			Usage()
+			return
+		}
+		value0 := argvalue0
+		fmt.Print(client.PutLopHP(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "addSinhVienVaoLop":
+		if flag.NArg()-1 != 2 {
+			fmt.Fprintln(os.Stderr, "AddSinhVienVaoLop requires 2 args")
+			flag.Usage()
+		}
+		arg45 := flag.Arg(1)
+		mbTrans46 := thrift.NewTMemoryBufferLen(len(arg45))
+		defer mbTrans46.Close()
+		_, err47 := mbTrans46.WriteString(arg45)
+		if err47 != nil {
+			Usage()
+			return
+		}
+		factory48 := thrift.NewTJSONProtocolFactory()
+		jsProt49 := factory48.GetProtocol(mbTrans46)
+		argvalue0 := apiservice.NewSinhVien()
+		err50 := argvalue0.Read(jsProt49)
+		if err50 != nil {
+			Usage()
+			return
+		}
+		value0 := argvalue0
+		argvalue1 := flag.Arg(2)
+		value1 := argvalue1
+		fmt.Print(client.AddSinhVienVaoLop(context.Background(), value0, value1))
+		fmt.Print("\n")
+		break
+	case "addSinhVienSlicesVaoLop":
+		if flag.NArg()-1 != 2 {
+			fmt.Fprintln(os.Stderr, "AddSinhVienSlicesVaoLop requires 2 args")
+			flag.Usage()
+		}
+		arg52 := flag.Arg(1)
+		mbTrans53 := thrift.NewTMemoryBufferLen(len(arg52))
+		defer mbTrans53.Close()
+		_, err54 := mbTrans53.WriteString(arg52)
+		if err54 != nil {
+			Usage()
+			return
+		}
+		factory55 := thrift.NewTJSONProtocolFactory()
+		jsProt56 := factory55.GetProtocol(mbTrans53)
+		containerStruct0 := apiservice.NewManagerStudentAddSinhVienSlicesVaoLopArgs()
+		err57 := containerStruct0.ReadField1(jsProt56)
+		if err57 != nil {
+			Usage()
+			return
+		}
+		argvalue0 := containerStruct0.Lsv
+		value0 := apiservice.SinhVienSlices(argvalue0)
+		argvalue1 := flag.Arg(2)
+		value1 := argvalue1
+		fmt.Print(client.AddSinhVienSlicesVaoLop(context.Background(), value0, value1))
+		fmt.Print("\n")
+		break
+	case "existsLopHP":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "ExistsLopHP requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.ExistsLopHP(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "existsSinhVienTrongLop":
+		if flag.NArg()-1 != 2 {
+			fmt.Fprintln(os.Stderr, "ExistsSinhVienTrongLop requires 2 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		argvalue1 := flag.Arg(2)
+		value1 := argvalue1
+		fmt.Print(client.ExistsSinhVienTrongLop(context.Background(), value0, value1))
+		fmt.Print("\n")
+		break
+	case "getLopHocPhan":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "GetLopHocPhan requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.GetLopHocPhan(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "getLopHocPhanSlice":
+		if flag.NArg()-1 != 0 {
+			fmt.Fprintln(os.Stderr, "GetLopHocPhanSlice requires 0 args")
+			flag.Usage()
+		}
+		fmt.Print(client.GetLopHocPhanSlice(context.Background()))
+		fmt.Print("\n")
+		break
+	case "getSinhVienLHP":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "GetSinhVienLHP requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.GetSinhVienLHP(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "delLopHP":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "DelLopHP requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.DelLopHP(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "putSVOutLopHP":
+		if flag.NArg()-1 != 2 {
+			fmt.Fprintln(os.Stderr, "PutSVOutLopHP requires 2 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		argvalue1 := flag.Arg(2)
+		value1 := argvalue1
+		fmt.Print(client.PutSVOutLopHP(context.Background(), value0, value1))
+		fmt.Print("\n")
+		break
+	case "putSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "PutSinhVien requires 1 args")
+			flag.Usage()
+		}
+		arg67 := flag.Arg(1)
+		mbTrans68 := thrift.NewTMemoryBufferLen(len(arg67))
+		defer mbTrans68.Close()
+		_, err69 := mbTrans68.WriteString(arg67)
+		if err69 != nil {
+			Usage()
+			return
+		}
+		factory70 := thrift.NewTJSONProtocolFactory()
+		jsProt71 := factory70.GetProtocol(mbTrans68)
+		argvalue0 := apiservice.NewSinhVien()
+		err72 := argvalue0.Read(jsProt71)
+		if err72 != nil {
+			Usage()
+			return
+		}
+		value0 := argvalue0
+		fmt.Print(client.PutSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "existsSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "ExistsSinhVien requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.ExistsSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "getSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "GetSinhVien requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.GetSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "delSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "DelSinhVien requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.DelSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "searchSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "SearchSinhVien requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.SearchSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "":
+		Usage()
+		break
+	default:
+		fmt.Fprintln(os.Stderr, "Invalid function ", cmd)
+	}
 }

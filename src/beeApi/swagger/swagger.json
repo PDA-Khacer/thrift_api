@@ -168,7 +168,33 @@
                 }
             }
         },
-        "/manager/class/get/{ma}": {
+        "/manager/class/search/{key}": {
+            "get": {
+                "tags": [
+                    "manager"
+                ],
+                "description": "create users",
+                "operationId": "ManagerController.SearchStudent",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} models.SinhVienSlices"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/manager/class/{ma}": {
             "get": {
                 "tags": [
                     "manager"
@@ -251,7 +277,7 @@
                 }
             }
         },
-        "/manager/student/get/{ma}": {
+        "/manager/student/{ma}": {
             "get": {
                 "tags": [
                     "manager"
@@ -461,8 +487,8 @@
         }
     },
     "definitions": {
-        "models.\u0026{245 SinhVien}": {
-            "title": "\u0026{245 SinhVien}",
+        "models.\u0026{277 SinhVien}": {
+            "title": "\u0026{277 SinhVien}",
             "type": "object"
         },
         "models.LopHocPhan": {
@@ -528,7 +554,7 @@
             "title": "SinhVienSlices",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.\u0026{245 SinhVien}"
+                "$ref": "#/definitions/models.\u0026{277 SinhVien}"
             }
         },
         "models.User": {

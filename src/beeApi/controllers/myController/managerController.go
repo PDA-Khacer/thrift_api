@@ -116,7 +116,7 @@ func (u *ManagerController) AddStudentsToClass() {
 // @Param	ma		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.SinhVien
 // @Failure 403 :ma is empty
-// @router /student/get/:ma [get]
+// @router /student/:ma [get]
 func (u *ManagerController) GetStudent() {
 	uid := u.GetString(":ma")
 	if uid != "" {
@@ -135,7 +135,7 @@ func (u *ManagerController) GetStudent() {
 // @Param	ma		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.LopHocPhan
 // @Failure 403 :uid is empty
-// @router /class/get/:ma [get]
+// @router /class/:ma [get]
 func (u *ManagerController) GetClass() {
 	uid := u.GetString(":ma")
 	if uid != "" {
@@ -197,6 +197,25 @@ func (u *ManagerController) DeleteClass() {
 	uid := u.GetString(":ma")
 	if uid != "" {
 		user, err := models.GetClient().DelLopHP(defaultCtx, uid)
+		if err != nil {
+			u.Data["json"] = err.Error()
+		} else {
+			u.Data["json"] = user
+		}
+	}
+	u.ServeJSON()
+}
+
+// @Title SearchStudent
+// @Description create users
+// @Param	key		path 	string	true		"The key for staticblock"
+// @Success 200 {string} models.SinhVienSlices
+// @Failure 403 body is empty
+// @router /class/search/:key [get]
+func (u *ManagerController) SearchStudent() {
+	uid := u.GetString(":key")
+	if uid != "" {
+		user, err := models.GetClient().SearchSinhVien(defaultCtx, uid)
 		if err != nil {
 			u.Data["json"] = err.Error()
 		} else {
