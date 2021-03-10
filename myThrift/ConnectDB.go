@@ -1,4 +1,4 @@
-package myThrift
+package main
 
 import (
 	"log"

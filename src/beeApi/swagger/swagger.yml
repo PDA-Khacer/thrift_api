@@ -11,7 +11,126 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
-  /manager/:
+  /manager/class/add-student/{ma_lop}:
+    put:
+      tags:
+      - manager
+      description: Add a student to class
+      operationId: ManagerController.AddStudentToClass
+      parameters:
+      - in: body
+        name: sv
+        description: body for Class content
+        required: true
+        schema:
+          $ref: '#/definitions/models.SinhVien'
+      - in: path
+        name: ma_lop
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} result'
+        "403":
+          description: body is empty
+  /manager/class/add-students/:
+    put:
+      tags:
+      - manager
+      description: Add students to class
+      operationId: ManagerController.AddStudentsToClass
+      parameters:
+      - in: body
+        name: sv
+        description: body for Class content
+        required: true
+        schema:
+          $ref: '#/definitions/models.SinhVienSlices'
+      - in: path
+        name: maLop
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} result'
+        "403":
+          description: body is empty
+  /manager/class/create:
+    post:
+      tags:
+      - manager
+      description: create Class
+      operationId: ManagerController.CreateClass
+      parameters:
+      - in: body
+        name: body
+        description: body for Class content
+        required: true
+        schema:
+          $ref: '#/definitions/models.LopHocPhan'
+      responses:
+        "200":
+          description: '{string} models.LopHocPhan[Ma]'
+        "403":
+          description: body is empty
+  /manager/class/delete/{ma}:
+    delete:
+      tags:
+      - manager
+      description: create users
+      operationId: ManagerController.DeleteClass
+      parameters:
+      - in: path
+        name: ma
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} models.LopHocPhan[Ma]'
+        "403":
+          description: body is empty
+  /manager/class/get-student/{ma}:
+    get:
+      tags:
+      - manager
+      description: get Student by uid class
+      operationId: ManagerController.GetStudentInClass
+      parameters:
+      - in: path
+        name: ma
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SinhVienSlices'
+        "403":
+          description: :uid is empty
+  /manager/class/get/{ma}:
+    get:
+      tags:
+      - manager
+      description: get user by uid
+      operationId: ManagerController.GetClass
+      parameters:
+      - in: path
+        name: ma
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.LopHocPhan'
+        "403":
+          description: :uid is empty
+  /manager/student/create:
     post:
       tags:
       - manager
@@ -23,13 +142,30 @@ paths:
         description: body for sinhvien content
         required: true
         schema:
-          $ref: '#/definitions/apiservice.SinhVien'
+          $ref: '#/definitions/models.SinhVien'
       responses:
         "200":
-          description: '{int} apiservice.SinhVien.Ma'
+          description: '{string} models.SinhVien[Ma]'
         "403":
           description: body is empty
-  /manager/{uid}:
+  /manager/student/delete/{ma}:
+    delete:
+      tags:
+      - manager
+      description: create users
+      operationId: ManagerController.DeleteStudent
+      parameters:
+      - in: path
+        name: ma
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{int} models.SinhVien[Ma]'
+        "403":
+          description: body is empty
+  /manager/student/get/{ma}:
     get:
       tags:
       - manager
@@ -37,7 +173,7 @@ paths:
       operationId: ManagerController.GetStudent
       parameters:
       - in: path
-        name: uid
+        name: ma
         description: The key for staticblock
         required: true
         type: string
@@ -45,98 +181,9 @@ paths:
         "200":
           description: ""
           schema:
-            $ref: '#/definitions/apiservice.SinhVien'
+            $ref: '#/definitions/models.SinhVien'
         "403":
-          description: :uid is empty
-  /object/:
-    get:
-      tags:
-      - object
-      description: get all objects
-      operationId: ObjectController.GetAll
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
-        "403":
-          description: :objectId is empty
-    post:
-      tags:
-      - object
-      description: create object
-      operationId: ObjectController.Create
-      parameters:
-      - in: body
-        name: body
-        description: The object content
-        required: true
-        schema:
-          $ref: '#/definitions/models.Object'
-      responses:
-        "200":
-          description: '{string} models.Object.Id'
-        "403":
-          description: body is empty
-  /object/{objectId}:
-    get:
-      tags:
-      - object
-      description: find object by objectid
-      operationId: ObjectController.Get
-      parameters:
-      - in: path
-        name: objectId
-        description: the objectid you want to get
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
-        "403":
-          description: :objectId is empty
-    put:
-      tags:
-      - object
-      description: update the object
-      operationId: ObjectController.Update
-      parameters:
-      - in: path
-        name: objectId
-        description: The objectid you want to update
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: The body
-        required: true
-        schema:
-          $ref: '#/definitions/models.Object'
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Object'
-        "403":
-          description: :objectId is empty
-    delete:
-      tags:
-      - object
-      description: delete the object
-      operationId: ObjectController.Delete
-      parameters:
-      - in: path
-        name: objectId
-        description: The objectId you want to delete
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{string} delete success!'
-        "403":
-          description: objectId is empty
+          description: :ma is empty
   /user/:
     get:
       tags:
@@ -256,20 +303,21 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  apiservice.SinhVien:
-    title: SinhVien
+  models.&{245 SinhVien}:
+    title: '&{245 SinhVien}'
     type: object
-  models.Object:
-    title: Object
+  models.LopHocPhan:
+    title: LopHocPhan
     type: object
     properties:
-      ObjectId:
+      DsSinhVien:
+        $ref: '#/definitions/models.SinhVienSlices'
+      GiaoVien:
         type: string
-      PlayerName:
+      Ma:
         type: string
-      Score:
-        type: integer
-        format: int64
+      Ten:
+        type: string
   models.Profile:
     title: Profile
     type: object
@@ -283,6 +331,26 @@ definitions:
         type: string
       Gender:
         type: string
+  models.SinhVien:
+    title: SinhVien
+    type: object
+    properties:
+      GioiTinh:
+        type: integer
+        format: int32
+      HoTen:
+        type: string
+      Ma:
+        type: string
+      NgaySinh:
+        type: string
+      Sdt:
+        type: string
+  models.SinhVienSlices:
+    title: SinhVienSlices
+    type: array
+    items:
+      $ref: '#/definitions/models.&{245 SinhVien}'
   models.User:
     title: User
     type: object
@@ -296,9 +364,6 @@ definitions:
       Username:
         type: string
 tags:
-- name: object
-  description: |
-    Operations about object
 - name: user
   description: |
     Operations about Users
