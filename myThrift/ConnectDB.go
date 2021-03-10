@@ -1,11 +1,11 @@
-package main
+package myThrift
 
 import (
-	"github.com/apache/thrift/lib/go/thrift"
 	"log"
 	"managerStudent/serverDB/thrift/gen-go/openstars/core/bigset/generic"
-)
 
+	"github.com/apache/thrift/lib/go/thrift"
+)
 
 func Connect() *generic.TStringBigSetKVServiceClient {
 	var transport thrift.TTransport

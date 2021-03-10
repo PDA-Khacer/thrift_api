@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
 	"log"
+	"managerStudent/myThrift"
 	"managerStudent/myThrift/gen-go/apiservice"
 )
 
@@ -18,7 +19,7 @@ func main() {
 	fmt.Printf("%T\n", transport)
 	transportFactory := thrift.NewTTransportFactory()
 	protocolFactory := thrift.NewTCompactProtocolFactory()
-	handler := NewManagerStudentHandler()
+	handler := myThrift.NewManagerStudentHandler()
 	processor := apiservice.NewManagerStudentProcessor(handler)
 	server := thrift.NewTSimpleServer4(processor, transport, transportFactory, protocolFactory)
 	fmt.Println("Starting the simple server... on ", "127.0.0.1:7777")

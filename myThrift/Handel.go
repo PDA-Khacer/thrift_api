@@ -77,7 +77,6 @@ func (p *ManagerStudentHandler) ExistsSinhVienTrongLop(ctx context.Context, maLH
 }
 
 func (p *ManagerStudentHandler) GetLopHocPhan(ctx context.Context, ma string) (r *apiservice.LopHocPhan, err error) {
-
 	re, err := client.BsGetItem(ctx, "LopHocPhan", []byte(ma))
 	var i *apiservice.LopHocPhan
 	if err := json.Unmarshal([]byte(re.Item.Value), i); err != nil {
@@ -91,7 +90,6 @@ func (p *ManagerStudentHandler) GetLopHocPhanSlice(ctx context.Context) (r apise
 }
 
 func (p *ManagerStudentHandler) GetSinhVienLHP(ctx context.Context, maLHP string) (r apiservice.SinhVienSlices, err error) {
-
 	var i apiservice.LopHocPhan
 	re, _ := client.BsGetItem(ctx, "LopHocPhan", []byte(maLHP))
 	value := re.Item.Value
@@ -139,7 +137,6 @@ func (p *ManagerStudentHandler) PutSinhVien(ctx context.Context, sv *apiservice.
 }
 
 func (p *ManagerStudentHandler) ExistsSinhVien(ctx context.Context, maSV string) (r int32, err error) {
-
 	re, _ := client.BsExisted(ctx, "SinhVien", []byte(maSV))
 	if re.Existed == true {
 		return 1, err
@@ -148,7 +145,6 @@ func (p *ManagerStudentHandler) ExistsSinhVien(ctx context.Context, maSV string)
 }
 
 func (p *ManagerStudentHandler) GetSinhVien(ctx context.Context, maSV string) (r *apiservice.SinhVien, err error) {
-
 	re, err := client.BsGetItem(ctx, "SinhVien", []byte(maSV))
 	var i *apiservice.SinhVien
 	if err := json.Unmarshal([]byte(re.Item.Value), i); err != nil {
@@ -158,7 +154,6 @@ func (p *ManagerStudentHandler) GetSinhVien(ctx context.Context, maSV string) (r
 }
 
 func (p *ManagerStudentHandler) DelSinhVien(ctx context.Context, maSV string) (r int32, err error) {
-
 	re, err := client.BsRemoveItem(ctx, "SinhVien", []byte(maSV))
 	if re == true {
 		return 1, err
