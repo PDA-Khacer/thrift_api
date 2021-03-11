@@ -15,18 +15,7 @@ type ManagerStudentHandler struct {
 	log map[int]*apiservice.ManagerStudent
 }
 
-func NewManagerStudentHandler() *ManagerStudentHandler {
-	return &ManagerStudentHandler{log: make(map[int]*apiservice.ManagerStudent)}
-}
-
-func (p *ManagerStudentHandler) Init(ctx context.Context) (err error) {
-	client.CreateStringBigSet(ctx, "SinhVien")
-	client.CreateStringBigSet(ctx, "LopHocPhan")
-	fmt.Println("Oke")
-	return err
-}
-
-func (p *ManagerStudentHandler) PutLopHP(ctx context.Context, lopHP *apiservice.LopHocPhan) (r int32, err error) {
+func (p *ManagerStudentHandler) AddLopHP(ctx context.Context, lopHP *apiservice.LopHocPhan) (r int32, err error) {
 	if re, err := p.ExistsLopHP(ctx, lopHP.Ma); re != 1 {
 		if err != nil {
 			log.Fatal(err, "  myThrift/Handel.go:32")
@@ -39,6 +28,20 @@ func (p *ManagerStudentHandler) PutLopHP(ctx context.Context, lopHP *apiservice.
 		if err != nil {
 			log.Fatal(err, "  myThrift/Handel.go:36")
 		}
+		item2 := generic.NewTItem()
+		item2.Key = []byte(lopHP.Ma)
+		var b2 = &apiservice.DanhSachSinhVienLopHocPhan{MaLHP: lopHP.Ma, DsSV: []string{}}
+		item2.Value, err = json.Marshal(b2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		re1, err := client.BsPutItem(ctx, "DanhSachSinhVienLopHocPhan", item2)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if re1.Ok == false {
+			return -3, err
+		}
 		if re.Ok == true {
 			return 1, err
 		}
@@ -49,44 +52,175 @@ func (p *ManagerStudentHandler) PutLopHP(ctx context.Context, lopHP *apiservice.
 		}
 		return -2, err
 	}
-
 }
 
-func (p *ManagerStudentHandler) AddSinhVienVaoLop(ctx context.Context, sv *apiservice.SinhVien, maLHP string) (r int32, err error) {
-	if re, _ := p.ExistsSinhVienTrongLop(ctx, maLHP, sv.Ma); re != -1 {
-		log.Println("Sinh vien chua ton tai trong lop")
-		if check, err := p.ExistsSinhVien(ctx, sv.Ma); check != 1 {
-			if err != nil {
-				log.Fatal(err)
+func (p *ManagerStudentHandler) GetLopHocPhanOfSinhVien(ctx context.Context, ma string) (r apiservice.LopHocPhanSlices, err error) {
+	if r, e := p.ExistsSinhVien(ctx, ma); e != nil {
+		log.Fatal(e)
+	} else {
+		if r == -1 {
+			return nil, err
+		} else {
+			count, e := client.GetTotalCount(ctx, "DanhSachSinhVienLopHocPhan")
+			if e != nil {
+				log.Fatal(e)
 			}
-			return -2, err
+			dsSVLHP, e := client.BsGetSlice(ctx, "DanhSachSinhVienLopHocPhan", 0, int32(count))
+			if e != nil {
+				log.Fatal(e)
+			}
+			var result = apiservice.LopHocPhanSlices{}
+			for _, i := range dsSVLHP.Items.Items {
+				if r2, e := p.ExistsSinhVienTrongLop(ctx, string(i.Key), ma); e != nil {
+					log.Fatal(e)
+				} else {
+					if r2 == 1 {
+						if lhp, e := p.GetLopHocPhan(ctx, string(i.Key)); e != nil {
+							log.Fatal(e)
+						} else {
+							if lhp != nil {
+								result = append(result, lhp)
+							}
+						}
+					}
+				}
+			}
+			return result, err
 		}
-		lhp, err := p.GetLopHocPhan(ctx, maLHP)
+	}
+	return nil, err
+}
+
+func (p *ManagerStudentHandler) AddSinhVien(ctx context.Context, sv *apiservice.SinhVien) (r int32, err error) {
+	if r, err := p.ExistsSinhVien(ctx, sv.Ma); r != 1 {
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(err, "  myThrift/Handel.go:161")
 		}
-		lhp.DsSinhVien = append(lhp.DsSinhVien, sv)
-		temp, err := client.BsGetItem(ctx, "LopHocPhan", []byte(maLHP))
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:54")
-		}
-		log.Println("----- danh sach da ton tai: ", lhp.DsSinhVien)
-		temp.Item.Value, err = json.Marshal(lhp)
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:59")
-		}
-		re, err := client.BsPutItem(ctx, "LopHocPhan", temp.Item)
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:63")
-		}
+		log.Println("Sinh Vien chua ton tia")
+		item := generic.NewTItem()
+		item.Key = []byte(sv.Ma)
+		b, err := json.Marshal(sv)
+		log.Println(err, " src/Handel.go:126")
+		item.Value = b
+		re, err := client.BsPutItem(ctx, "SinhVien", item)
+		log.Println(err, " src/Handel.go:129")
+		// re, _ := client.BsGetItem(ctx, "SinhVien", []byte(sv.Ma))
 		if re.Ok == true {
-			return 1, nil
+			return 1, err
 		}
 		return -1, err
 	} else {
-		log.Println("Sinh vien da ton tai trong lop")
-		return -1, err
+		if err != nil {
+			log.Fatal(err, "  myThrift/Handel.go:182")
+		}
+		return -2, err
 	}
+}
+
+func (p *ManagerStudentHandler) UpdateSinhVien(ctx context.Context, sv *apiservice.SinhVien) (r int32, err error) {
+	if re, err := p.ExistsSinhVien(ctx, sv.Ma); err != nil {
+		log.Fatal(err)
+	} else {
+		if re != -1 {
+			item := generic.NewTItem()
+			item.Key = []byte(sv.Ma)
+			b, err := json.Marshal(sv)
+			if err != nil {
+				log.Fatal(err)
+			}
+			item.Value = b
+			re, err := client.BsPutItem(ctx, "SinhVien", item)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if re.Ok == true {
+				return 1, err
+			}
+			return -1, err
+		} else {
+			log.Println("Sinh vien khong ton tai")
+			return -2, nil
+		}
+	}
+	return 0, err
+}
+
+func (p *ManagerStudentHandler) UpdateLopHP(ctx context.Context, lhp *apiservice.LopHocPhan) (r int32, err error) {
+	if re, err := p.ExistsLopHP(ctx, lhp.Ma); err != nil {
+		log.Fatal(err)
+	} else {
+		if re != -1 {
+			item := generic.NewTItem()
+			item.Key = []byte(lhp.Ma)
+			b, err := json.Marshal(lhp)
+			if err != nil {
+				log.Fatal(err)
+			}
+			item.Value = b
+			re, err := client.BsPutItem(ctx, "LopHocPhan", item)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if re.Ok == true {
+				return 1, err
+			}
+			return -1, err
+		} else {
+			log.Println("Lop hoc phan khong ton tai")
+			return -2, nil
+		}
+	}
+	return 0, err
+}
+
+func NewManagerStudentHandler() *ManagerStudentHandler {
+	return &ManagerStudentHandler{log: make(map[int]*apiservice.ManagerStudent)}
+}
+
+func (p *ManagerStudentHandler) Init(ctx context.Context) (err error) {
+	client.CreateStringBigSet(ctx, "SinhVien")
+	client.CreateStringBigSet(ctx, "LopHocPhan")
+	fmt.Println("Oke")
+	return err
+}
+
+func (p *ManagerStudentHandler) AddSinhVienVaoLop(ctx context.Context, sv string, maLHP string) (r int32, err error) {
+	if check, err := p.ExistsSinhVien(ctx, sv); check != 1 {
+		if err != nil {
+			log.Fatal(err)
+		}
+		return -2, err
+	} else {
+		if re, _ := p.ExistsSinhVienTrongLop(ctx, maLHP, sv); re != 1 {
+			log.Println("Sinh vien chua ton tai trong lop")
+			temp, err := client.BsGetItem(ctx, "DanhSachSinhVienLopHocPhan", []byte(maLHP))
+			if err != nil {
+				log.Fatal(err, " myThrift/Handel.go:54")
+			}
+			var dssv = &apiservice.DanhSachSinhVienLopHocPhan{}
+			if err := json.Unmarshal(temp.Item.Value, dssv); err != nil {
+				log.Fatal(err)
+			} else {
+				dssv.DsSV = append(dssv.DsSV, sv)
+			}
+			b, err := json.Marshal(dssv)
+			if err != nil {
+				log.Fatal(err)
+			}
+			temp.Item.Value = b
+			token, err := client.BsPutItem(ctx, "DanhSachSinhVienLopHocPhan", temp.Item)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if token.Ok == true {
+				return 1, nil
+			}
+		} else {
+			log.Println("Sinh vien da ton tai trong lop")
+			return -1, err
+		}
+	}
+	return -1, err
 }
 
 func (p *ManagerStudentHandler) AddSinhVienSlicesVaoLop(ctx context.Context, lsv apiservice.SinhVienSlices, maLHP string) (r int32, err error) {
@@ -99,21 +233,29 @@ func (p *ManagerStudentHandler) ExistsLopHP(ctx context.Context, maLHP string) (
 	if re.Existed == true {
 		return 1, err
 	}
-	return 0, err
+	return -1, err
 }
 
 func (p *ManagerStudentHandler) ExistsSinhVienTrongLop(ctx context.Context, maLHP string, maSinhVien string) (r int32, err error) {
-	ds, err := p.GetSinhVienLHP(ctx, maLHP)
+	var i apiservice.DanhSachSinhVienLopHocPhan
+	re, err := client.BsGetItem(ctx, "DanhSachSinhVienLopHocPhan", []byte(maLHP))
 	if err != nil {
-		log.Fatal(err, "  myThrift/Handel.go:83")
+		log.Fatal(err, "  myThrift/Handel.go:123")
 	}
-	log.Println("danh sach sinh vien hien co", ds)
-	for _, item := range ds {
-		if item.Ma == maSinhVien {
-			return -1, err
+	if re.Item == nil {
+		log.Println("Khong ton tai lop")
+		return -2, err
+	}
+	log.Println(string(re.Item.Value))
+	if err := json.Unmarshal(re.Item.Value, &i); err != nil {
+		return -1, err
+	}
+	for _, item := range i.DsSV {
+		if item == maSinhVien {
+			return 1, err
 		}
 	}
-	return 1, err
+	return -1, err
 }
 
 func (p *ManagerStudentHandler) GetLopHocPhan(ctx context.Context, ma string) (r *apiservice.LopHocPhan, err error) {
@@ -160,8 +302,8 @@ func (p *ManagerStudentHandler) GetLopHocPhanSlice(ctx context.Context) (r apise
 }
 
 func (p *ManagerStudentHandler) GetSinhVienLHP(ctx context.Context, maLHP string) (r apiservice.SinhVienSlices, err error) {
-	var i apiservice.LopHocPhan
-	re, err := client.BsGetItem(ctx, "LopHocPhan", []byte(maLHP))
+	var i apiservice.DanhSachSinhVienLopHocPhan
+	re, err := client.BsGetItem(ctx, "DanhSachSinhVienLopHocPhan", []byte(maLHP))
 	if err != nil {
 		log.Fatal(err, "  myThrift/Handel.go:123")
 	}
@@ -173,7 +315,16 @@ func (p *ManagerStudentHandler) GetSinhVienLHP(ctx context.Context, maLHP string
 	if err := json.Unmarshal(re.Item.Value, &i); err != nil {
 		return nil, err
 	}
-	return i.DsSinhVien, err
+	var result = apiservice.SinhVienSlices{}
+	for _, item := range i.DsSV {
+		var sv = &apiservice.SinhVien{}
+		sv, err = p.GetSinhVien(ctx, item)
+		if err != nil {
+			log.Fatal()
+		}
+		result = append(result, sv)
+	}
+	return result, err
 }
 
 func (p *ManagerStudentHandler) DelLopHP(ctx context.Context, maLHP string) (r int32, err error) {
@@ -188,62 +339,34 @@ func (p *ManagerStudentHandler) DelLopHP(ctx context.Context, maLHP string) (r i
 func (p *ManagerStudentHandler) PutSVOutLopHP(ctx context.Context, maLHP string, maSV string) (r int32, err error) {
 	if check, err := p.ExistsSinhVienTrongLop(ctx, maLHP, maSV); check != 1 {
 		log.Println("Sinh vien ton tai can delete")
-		ds, _ := p.GetSinhVienLHP(ctx, maLHP)
-		var temp apiservice.SinhVienSlices
-		for _, item := range ds {
-			if item.Ma != maSV {
-				temp = append(temp, item)
-			}
-		}
-		lhp, err := p.GetLopHocPhan(ctx, maLHP)
+		ds, err := client.BsGetItem(ctx, "DanhSachSinhVienLopHocPhan", []byte(maLHP))
 		if err != nil {
 			log.Fatal(err)
 		}
-		lhp.DsSinhVien = temp
-		temp2, err := client.BsGetItem(ctx, "LopHocPhan", []byte(maLHP))
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:199")
-		}
-		temp2.Item.Value, err = json.Marshal(lhp)
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:203")
-		}
-		re, err := client.BsPutItem(ctx, "LopHocPhan", temp2.Item)
-		if err != nil {
-			log.Fatal(err, " myThrift/Handel.go:207")
-		}
-		if re.Ok == true {
-			return 1, nil
-		}
-		return -1, err
-	} else {
-		return -2, err
-	}
-}
-
-func (p *ManagerStudentHandler) PutSinhVien(ctx context.Context, sv *apiservice.SinhVien) (r int32, err error) {
-	if r, err := p.ExistsSinhVien(ctx, sv.Ma); r != 1 {
-		if err != nil {
-			log.Fatal(err, "  myThrift/Handel.go:161")
-		}
-		log.Println("Sinh Vien chua ton tia")
-		item := generic.NewTItem()
-		item.Key = []byte(sv.Ma)
-		b, err := json.Marshal(sv)
-		log.Println(string(b))
-		log.Println(err, " src/Handel.go:126")
-		item.Value = b
-		re, err := client.BsPutItem(ctx, "SinhVien", item)
-		log.Println(err, " src/Handel.go:129")
-		// re, _ := client.BsGetItem(ctx, "SinhVien", []byte(sv.Ma))
-		if re.Ok == true {
-			return 1, err
+		var temp = &apiservice.DanhSachSinhVienLopHocPhan{}
+		var tempS = apiservice.IDSinhVienSlices{}
+		if err = json.Unmarshal(ds.Item.Value, &temp); err != nil {
+			log.Fatal(err)
+		} else {
+			for _, item := range temp.DsSV {
+				if item != maSV {
+					tempS = append(tempS, item)
+				}
+			}
+			ds.Item.Value, err = json.Marshal(tempS)
+			if err != nil {
+				log.Fatal(err)
+			}
+			token, err := client.BsPutItem(ctx, "DanhSachSinhVienLopHocPhan", ds.Item)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if token.Ok == true {
+				return 1, nil
+			}
 		}
 		return -1, err
 	} else {
-		if err != nil {
-			log.Fatal(err, "  myThrift/Handel.go:182")
-		}
 		return -2, err
 	}
 }
@@ -253,7 +376,7 @@ func (p *ManagerStudentHandler) ExistsSinhVien(ctx context.Context, maSV string)
 	if re.Existed == true {
 		return 1, err
 	}
-	return 0, err
+	return -1, err
 }
 
 func (p *ManagerStudentHandler) GetSinhVien(ctx context.Context, maSV string) (r *apiservice.SinhVien, err error) {

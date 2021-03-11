@@ -26,6 +26,10 @@ type LopHocPhanSlices []*LopHocPhan
 
 func LopHocPhanSlicesPtr(v LopHocPhanSlices) *LopHocPhanSlices { return &v }
 
+type IDSinhVienSlices []string
+
+func IDSinhVienSlicesPtr(v IDSinhVienSlices) *IDSinhVienSlices { return &v }
+
 // Attributes:
 //  - Ma
 //  - HoTen
@@ -293,12 +297,10 @@ func (p *SinhVien) String() string {
 //  - Ma
 //  - Ten
 //  - GiaoVien
-//  - DsSinhVien
 type LopHocPhan struct {
-	Ma         string         `thrift:"ma,1" db:"ma" json:"ma"`
-	Ten        string         `thrift:"ten,2" db:"ten" json:"ten"`
-	GiaoVien   string         `thrift:"giaoVien,3" db:"giaoVien" json:"giaoVien"`
-	DsSinhVien SinhVienSlices `thrift:"dsSinhVien,4" db:"dsSinhVien" json:"dsSinhVien"`
+	Ma       string `thrift:"ma,1" db:"ma" json:"ma"`
+	Ten      string `thrift:"ten,2" db:"ten" json:"ten"`
+	GiaoVien string `thrift:"giaoVien,3" db:"giaoVien" json:"giaoVien"`
 }
 
 func NewLopHocPhan() *LopHocPhan {
@@ -315,10 +317,6 @@ func (p *LopHocPhan) GetTen() string {
 
 func (p *LopHocPhan) GetGiaoVien() string {
 	return p.GiaoVien
-}
-
-func (p *LopHocPhan) GetDsSinhVien() SinhVienSlices {
-	return p.DsSinhVien
 }
 func (p *LopHocPhan) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
@@ -357,16 +355,6 @@ func (p *LopHocPhan) Read(iprot thrift.TProtocol) error {
 		case 3:
 			if fieldTypeId == thrift.STRING {
 				if err := p.ReadField3(iprot); err != nil {
-					return err
-				}
-			} else {
-				if err := iprot.Skip(fieldTypeId); err != nil {
-					return err
-				}
-			}
-		case 4:
-			if fieldTypeId == thrift.LIST {
-				if err := p.ReadField4(iprot); err != nil {
 					return err
 				}
 			} else {
@@ -416,26 +404,6 @@ func (p *LopHocPhan) ReadField3(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *LopHocPhan) ReadField4(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
-		return thrift.PrependError("error reading list begin: ", err)
-	}
-	tSlice := make(SinhVienSlices, 0, size)
-	p.DsSinhVien = tSlice
-	for i := 0; i < size; i++ {
-		_elem0 := &SinhVien{}
-		if err := _elem0.Read(iprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem0), err)
-		}
-		p.DsSinhVien = append(p.DsSinhVien, _elem0)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return thrift.PrependError("error reading list end: ", err)
-	}
-	return nil
-}
-
 func (p *LopHocPhan) Write(oprot thrift.TProtocol) error {
 	if err := oprot.WriteStructBegin("LopHocPhan"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
@@ -448,9 +416,6 @@ func (p *LopHocPhan) Write(oprot thrift.TProtocol) error {
 			return err
 		}
 		if err := p.writeField3(oprot); err != nil {
-			return err
-		}
-		if err := p.writeField4(oprot); err != nil {
 			return err
 		}
 	}
@@ -502,27 +467,6 @@ func (p *LopHocPhan) writeField3(oprot thrift.TProtocol) (err error) {
 	return err
 }
 
-func (p *LopHocPhan) writeField4(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("dsSinhVien", thrift.LIST, 4); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:dsSinhVien: ", p), err)
-	}
-	if err := oprot.WriteListBegin(thrift.STRUCT, len(p.DsSinhVien)); err != nil {
-		return thrift.PrependError("error writing list begin: ", err)
-	}
-	for _, v := range p.DsSinhVien {
-		if err := v.Write(oprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
-		}
-	}
-	if err := oprot.WriteListEnd(); err != nil {
-		return thrift.PrependError("error writing list end: ", err)
-	}
-	if err := oprot.WriteFieldEnd(); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T write field end error 4:dsSinhVien: ", p), err)
-	}
-	return err
-}
-
 func (p *LopHocPhan) String() string {
 	if p == nil {
 		return "<nil>"
@@ -530,15 +474,176 @@ func (p *LopHocPhan) String() string {
 	return fmt.Sprintf("LopHocPhan(%+v)", *p)
 }
 
+// Attributes:
+//  - MaLHP
+//  - DsSV
+type DanhSachSinhVienLopHocPhan struct {
+	MaLHP string           `thrift:"maLHP,1" db:"maLHP" json:"maLHP"`
+	DsSV  IDSinhVienSlices `thrift:"dsSV,2" db:"dsSV" json:"dsSV"`
+}
+
+func NewDanhSachSinhVienLopHocPhan() *DanhSachSinhVienLopHocPhan {
+	return &DanhSachSinhVienLopHocPhan{}
+}
+
+func (p *DanhSachSinhVienLopHocPhan) GetMaLHP() string {
+	return p.MaLHP
+}
+
+func (p *DanhSachSinhVienLopHocPhan) GetDsSV() IDSinhVienSlices {
+	return p.DsSV
+}
+func (p *DanhSachSinhVienLopHocPhan) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.LIST {
+				if err := p.ReadField2(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *DanhSachSinhVienLopHocPhan) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.MaLHP = v
+	}
+	return nil
+}
+
+func (p *DanhSachSinhVienLopHocPhan) ReadField2(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return thrift.PrependError("error reading list begin: ", err)
+	}
+	tSlice := make(IDSinhVienSlices, 0, size)
+	p.DsSV = tSlice
+	for i := 0; i < size; i++ {
+		var _elem0 string
+		if v, err := iprot.ReadString(); err != nil {
+			return thrift.PrependError("error reading field 0: ", err)
+		} else {
+			_elem0 = v
+		}
+		p.DsSV = append(p.DsSV, _elem0)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return thrift.PrependError("error reading list end: ", err)
+	}
+	return nil
+}
+
+func (p *DanhSachSinhVienLopHocPhan) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("DanhSachSinhVienLopHocPhan"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+		if err := p.writeField2(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *DanhSachSinhVienLopHocPhan) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("maLHP", thrift.STRING, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:maLHP: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.MaLHP)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.maLHP (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:maLHP: ", p), err)
+	}
+	return err
+}
+
+func (p *DanhSachSinhVienLopHocPhan) writeField2(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("dsSV", thrift.LIST, 2); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:dsSV: ", p), err)
+	}
+	if err := oprot.WriteListBegin(thrift.STRING, len(p.DsSV)); err != nil {
+		return thrift.PrependError("error writing list begin: ", err)
+	}
+	for _, v := range p.DsSV {
+		if err := oprot.WriteString(string(v)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err)
+		}
+	}
+	if err := oprot.WriteListEnd(); err != nil {
+		return thrift.PrependError("error writing list end: ", err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 2:dsSV: ", p), err)
+	}
+	return err
+}
+
+func (p *DanhSachSinhVienLopHocPhan) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("DanhSachSinhVienLopHocPhan(%+v)", *p)
+}
+
 type ManagerStudent interface {
 	Init(ctx context.Context) (err error)
 	// Parameters:
 	//  - LopHP
-	PutLopHP(ctx context.Context, lopHP *LopHocPhan) (r int32, err error)
+	AddLopHP(ctx context.Context, lopHP *LopHocPhan) (r int32, err error)
 	// Parameters:
 	//  - Sv
 	//  - MaLHP
-	AddSinhVienVaoLop(ctx context.Context, sv *SinhVien, maLHP string) (r int32, err error)
+	AddSinhVienVaoLop(ctx context.Context, sv string, maLHP string) (r int32, err error)
 	// Parameters:
 	//  - Lsv
 	//  - MaLHP
@@ -555,6 +660,9 @@ type ManagerStudent interface {
 	GetLopHocPhan(ctx context.Context, ma string) (r *LopHocPhan, err error)
 	GetLopHocPhanSlice(ctx context.Context) (r LopHocPhanSlices, err error)
 	// Parameters:
+	//  - Ma
+	GetLopHocPhanOfSinhVien(ctx context.Context, ma string) (r LopHocPhanSlices, err error)
+	// Parameters:
 	//  - MaLHP
 	GetSinhVienLHP(ctx context.Context, maLHP string) (r SinhVienSlices, err error)
 	// Parameters:
@@ -566,7 +674,7 @@ type ManagerStudent interface {
 	PutSVOutLopHP(ctx context.Context, maLHP string, maSV string) (r int32, err error)
 	// Parameters:
 	//  - Sv
-	PutSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error)
+	AddSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error)
 	// Parameters:
 	//  - MaSV
 	ExistsSinhVien(ctx context.Context, maSV string) (r int32, err error)
@@ -579,6 +687,12 @@ type ManagerStudent interface {
 	// Parameters:
 	//  - Key
 	SearchSinhVien(ctx context.Context, key string) (r SinhVienSlices, err error)
+	// Parameters:
+	//  - Sv
+	UpdateSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error)
+	// Parameters:
+	//  - Lhp
+	UpdateLopHP(ctx context.Context, lhp *LopHocPhan) (r int32, err error)
 }
 
 type ManagerStudentClient struct {
@@ -617,11 +731,11 @@ func (p *ManagerStudentClient) Init(ctx context.Context) (err error) {
 
 // Parameters:
 //  - LopHP
-func (p *ManagerStudentClient) PutLopHP(ctx context.Context, lopHP *LopHocPhan) (r int32, err error) {
-	var _args3 ManagerStudentPutLopHPArgs
+func (p *ManagerStudentClient) AddLopHP(ctx context.Context, lopHP *LopHocPhan) (r int32, err error) {
+	var _args3 ManagerStudentAddLopHPArgs
 	_args3.LopHP = lopHP
-	var _result4 ManagerStudentPutLopHPResult
-	if err = p.Client_().Call(ctx, "putLopHP", &_args3, &_result4); err != nil {
+	var _result4 ManagerStudentAddLopHPResult
+	if err = p.Client_().Call(ctx, "addLopHP", &_args3, &_result4); err != nil {
 		return
 	}
 	return _result4.GetSuccess(), nil
@@ -630,7 +744,7 @@ func (p *ManagerStudentClient) PutLopHP(ctx context.Context, lopHP *LopHocPhan) 
 // Parameters:
 //  - Sv
 //  - MaLHP
-func (p *ManagerStudentClient) AddSinhVienVaoLop(ctx context.Context, sv *SinhVien, maLHP string) (r int32, err error) {
+func (p *ManagerStudentClient) AddSinhVienVaoLop(ctx context.Context, sv string, maLHP string) (r int32, err error) {
 	var _args5 ManagerStudentAddSinhVienVaoLopArgs
 	_args5.Sv = sv
 	_args5.MaLHP = maLHP
@@ -703,12 +817,12 @@ func (p *ManagerStudentClient) GetLopHocPhanSlice(ctx context.Context) (r LopHoc
 }
 
 // Parameters:
-//  - MaLHP
-func (p *ManagerStudentClient) GetSinhVienLHP(ctx context.Context, maLHP string) (r SinhVienSlices, err error) {
-	var _args17 ManagerStudentGetSinhVienLHPArgs
-	_args17.MaLHP = maLHP
-	var _result18 ManagerStudentGetSinhVienLHPResult
-	if err = p.Client_().Call(ctx, "getSinhVienLHP", &_args17, &_result18); err != nil {
+//  - Ma
+func (p *ManagerStudentClient) GetLopHocPhanOfSinhVien(ctx context.Context, ma string) (r LopHocPhanSlices, err error) {
+	var _args17 ManagerStudentGetLopHocPhanOfSinhVienArgs
+	_args17.Ma = ma
+	var _result18 ManagerStudentGetLopHocPhanOfSinhVienResult
+	if err = p.Client_().Call(ctx, "getLopHocPhanOfSinhVien", &_args17, &_result18); err != nil {
 		return
 	}
 	return _result18.GetSuccess(), nil
@@ -716,11 +830,11 @@ func (p *ManagerStudentClient) GetSinhVienLHP(ctx context.Context, maLHP string)
 
 // Parameters:
 //  - MaLHP
-func (p *ManagerStudentClient) DelLopHP(ctx context.Context, maLHP string) (r int32, err error) {
-	var _args19 ManagerStudentDelLopHPArgs
+func (p *ManagerStudentClient) GetSinhVienLHP(ctx context.Context, maLHP string) (r SinhVienSlices, err error) {
+	var _args19 ManagerStudentGetSinhVienLHPArgs
 	_args19.MaLHP = maLHP
-	var _result20 ManagerStudentDelLopHPResult
-	if err = p.Client_().Call(ctx, "delLopHP", &_args19, &_result20); err != nil {
+	var _result20 ManagerStudentGetSinhVienLHPResult
+	if err = p.Client_().Call(ctx, "getSinhVienLHP", &_args19, &_result20); err != nil {
 		return
 	}
 	return _result20.GetSuccess(), nil
@@ -728,37 +842,37 @@ func (p *ManagerStudentClient) DelLopHP(ctx context.Context, maLHP string) (r in
 
 // Parameters:
 //  - MaLHP
-//  - MaSV
-func (p *ManagerStudentClient) PutSVOutLopHP(ctx context.Context, maLHP string, maSV string) (r int32, err error) {
-	var _args21 ManagerStudentPutSVOutLopHPArgs
+func (p *ManagerStudentClient) DelLopHP(ctx context.Context, maLHP string) (r int32, err error) {
+	var _args21 ManagerStudentDelLopHPArgs
 	_args21.MaLHP = maLHP
-	_args21.MaSV = maSV
-	var _result22 ManagerStudentPutSVOutLopHPResult
-	if err = p.Client_().Call(ctx, "putSVOutLopHP", &_args21, &_result22); err != nil {
+	var _result22 ManagerStudentDelLopHPResult
+	if err = p.Client_().Call(ctx, "delLopHP", &_args21, &_result22); err != nil {
 		return
 	}
 	return _result22.GetSuccess(), nil
 }
 
 // Parameters:
-//  - Sv
-func (p *ManagerStudentClient) PutSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error) {
-	var _args23 ManagerStudentPutSinhVienArgs
-	_args23.Sv = sv
-	var _result24 ManagerStudentPutSinhVienResult
-	if err = p.Client_().Call(ctx, "putSinhVien", &_args23, &_result24); err != nil {
+//  - MaLHP
+//  - MaSV
+func (p *ManagerStudentClient) PutSVOutLopHP(ctx context.Context, maLHP string, maSV string) (r int32, err error) {
+	var _args23 ManagerStudentPutSVOutLopHPArgs
+	_args23.MaLHP = maLHP
+	_args23.MaSV = maSV
+	var _result24 ManagerStudentPutSVOutLopHPResult
+	if err = p.Client_().Call(ctx, "putSVOutLopHP", &_args23, &_result24); err != nil {
 		return
 	}
 	return _result24.GetSuccess(), nil
 }
 
 // Parameters:
-//  - MaSV
-func (p *ManagerStudentClient) ExistsSinhVien(ctx context.Context, maSV string) (r int32, err error) {
-	var _args25 ManagerStudentExistsSinhVienArgs
-	_args25.MaSV = maSV
-	var _result26 ManagerStudentExistsSinhVienResult
-	if err = p.Client_().Call(ctx, "existsSinhVien", &_args25, &_result26); err != nil {
+//  - Sv
+func (p *ManagerStudentClient) AddSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error) {
+	var _args25 ManagerStudentAddSinhVienArgs
+	_args25.Sv = sv
+	var _result26 ManagerStudentAddSinhVienResult
+	if err = p.Client_().Call(ctx, "addSinhVien", &_args25, &_result26); err != nil {
 		return
 	}
 	return _result26.GetSuccess(), nil
@@ -766,11 +880,11 @@ func (p *ManagerStudentClient) ExistsSinhVien(ctx context.Context, maSV string) 
 
 // Parameters:
 //  - MaSV
-func (p *ManagerStudentClient) GetSinhVien(ctx context.Context, maSV string) (r *SinhVien, err error) {
-	var _args27 ManagerStudentGetSinhVienArgs
+func (p *ManagerStudentClient) ExistsSinhVien(ctx context.Context, maSV string) (r int32, err error) {
+	var _args27 ManagerStudentExistsSinhVienArgs
 	_args27.MaSV = maSV
-	var _result28 ManagerStudentGetSinhVienResult
-	if err = p.Client_().Call(ctx, "getSinhVien", &_args27, &_result28); err != nil {
+	var _result28 ManagerStudentExistsSinhVienResult
+	if err = p.Client_().Call(ctx, "existsSinhVien", &_args27, &_result28); err != nil {
 		return
 	}
 	return _result28.GetSuccess(), nil
@@ -778,26 +892,62 @@ func (p *ManagerStudentClient) GetSinhVien(ctx context.Context, maSV string) (r 
 
 // Parameters:
 //  - MaSV
-func (p *ManagerStudentClient) DelSinhVien(ctx context.Context, maSV string) (r int32, err error) {
-	var _args29 ManagerStudentDelSinhVienArgs
+func (p *ManagerStudentClient) GetSinhVien(ctx context.Context, maSV string) (r *SinhVien, err error) {
+	var _args29 ManagerStudentGetSinhVienArgs
 	_args29.MaSV = maSV
-	var _result30 ManagerStudentDelSinhVienResult
-	if err = p.Client_().Call(ctx, "delSinhVien", &_args29, &_result30); err != nil {
+	var _result30 ManagerStudentGetSinhVienResult
+	if err = p.Client_().Call(ctx, "getSinhVien", &_args29, &_result30); err != nil {
 		return
 	}
 	return _result30.GetSuccess(), nil
 }
 
 // Parameters:
-//  - Key
-func (p *ManagerStudentClient) SearchSinhVien(ctx context.Context, key string) (r SinhVienSlices, err error) {
-	var _args31 ManagerStudentSearchSinhVienArgs
-	_args31.Key = key
-	var _result32 ManagerStudentSearchSinhVienResult
-	if err = p.Client_().Call(ctx, "searchSinhVien", &_args31, &_result32); err != nil {
+//  - MaSV
+func (p *ManagerStudentClient) DelSinhVien(ctx context.Context, maSV string) (r int32, err error) {
+	var _args31 ManagerStudentDelSinhVienArgs
+	_args31.MaSV = maSV
+	var _result32 ManagerStudentDelSinhVienResult
+	if err = p.Client_().Call(ctx, "delSinhVien", &_args31, &_result32); err != nil {
 		return
 	}
 	return _result32.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Key
+func (p *ManagerStudentClient) SearchSinhVien(ctx context.Context, key string) (r SinhVienSlices, err error) {
+	var _args33 ManagerStudentSearchSinhVienArgs
+	_args33.Key = key
+	var _result34 ManagerStudentSearchSinhVienResult
+	if err = p.Client_().Call(ctx, "searchSinhVien", &_args33, &_result34); err != nil {
+		return
+	}
+	return _result34.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Sv
+func (p *ManagerStudentClient) UpdateSinhVien(ctx context.Context, sv *SinhVien) (r int32, err error) {
+	var _args35 ManagerStudentUpdateSinhVienArgs
+	_args35.Sv = sv
+	var _result36 ManagerStudentUpdateSinhVienResult
+	if err = p.Client_().Call(ctx, "UpdateSinhVien", &_args35, &_result36); err != nil {
+		return
+	}
+	return _result36.GetSuccess(), nil
+}
+
+// Parameters:
+//  - Lhp
+func (p *ManagerStudentClient) UpdateLopHP(ctx context.Context, lhp *LopHocPhan) (r int32, err error) {
+	var _args37 ManagerStudentUpdateLopHPArgs
+	_args37.Lhp = lhp
+	var _result38 ManagerStudentUpdateLopHPResult
+	if err = p.Client_().Call(ctx, "UpdateLopHP", &_args37, &_result38); err != nil {
+		return
+	}
+	return _result38.GetSuccess(), nil
 }
 
 type ManagerStudentProcessor struct {
@@ -820,24 +970,27 @@ func (p *ManagerStudentProcessor) ProcessorMap() map[string]thrift.TProcessorFun
 
 func NewManagerStudentProcessor(handler ManagerStudent) *ManagerStudentProcessor {
 
-	self33 := &ManagerStudentProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
-	self33.processorMap["init"] = &managerStudentProcessorInit{handler: handler}
-	self33.processorMap["putLopHP"] = &managerStudentProcessorPutLopHP{handler: handler}
-	self33.processorMap["addSinhVienVaoLop"] = &managerStudentProcessorAddSinhVienVaoLop{handler: handler}
-	self33.processorMap["addSinhVienSlicesVaoLop"] = &managerStudentProcessorAddSinhVienSlicesVaoLop{handler: handler}
-	self33.processorMap["existsLopHP"] = &managerStudentProcessorExistsLopHP{handler: handler}
-	self33.processorMap["existsSinhVienTrongLop"] = &managerStudentProcessorExistsSinhVienTrongLop{handler: handler}
-	self33.processorMap["getLopHocPhan"] = &managerStudentProcessorGetLopHocPhan{handler: handler}
-	self33.processorMap["getLopHocPhanSlice"] = &managerStudentProcessorGetLopHocPhanSlice{handler: handler}
-	self33.processorMap["getSinhVienLHP"] = &managerStudentProcessorGetSinhVienLHP{handler: handler}
-	self33.processorMap["delLopHP"] = &managerStudentProcessorDelLopHP{handler: handler}
-	self33.processorMap["putSVOutLopHP"] = &managerStudentProcessorPutSVOutLopHP{handler: handler}
-	self33.processorMap["putSinhVien"] = &managerStudentProcessorPutSinhVien{handler: handler}
-	self33.processorMap["existsSinhVien"] = &managerStudentProcessorExistsSinhVien{handler: handler}
-	self33.processorMap["getSinhVien"] = &managerStudentProcessorGetSinhVien{handler: handler}
-	self33.processorMap["delSinhVien"] = &managerStudentProcessorDelSinhVien{handler: handler}
-	self33.processorMap["searchSinhVien"] = &managerStudentProcessorSearchSinhVien{handler: handler}
-	return self33
+	self39 := &ManagerStudentProcessor{handler: handler, processorMap: make(map[string]thrift.TProcessorFunction)}
+	self39.processorMap["init"] = &managerStudentProcessorInit{handler: handler}
+	self39.processorMap["addLopHP"] = &managerStudentProcessorAddLopHP{handler: handler}
+	self39.processorMap["addSinhVienVaoLop"] = &managerStudentProcessorAddSinhVienVaoLop{handler: handler}
+	self39.processorMap["addSinhVienSlicesVaoLop"] = &managerStudentProcessorAddSinhVienSlicesVaoLop{handler: handler}
+	self39.processorMap["existsLopHP"] = &managerStudentProcessorExistsLopHP{handler: handler}
+	self39.processorMap["existsSinhVienTrongLop"] = &managerStudentProcessorExistsSinhVienTrongLop{handler: handler}
+	self39.processorMap["getLopHocPhan"] = &managerStudentProcessorGetLopHocPhan{handler: handler}
+	self39.processorMap["getLopHocPhanSlice"] = &managerStudentProcessorGetLopHocPhanSlice{handler: handler}
+	self39.processorMap["getLopHocPhanOfSinhVien"] = &managerStudentProcessorGetLopHocPhanOfSinhVien{handler: handler}
+	self39.processorMap["getSinhVienLHP"] = &managerStudentProcessorGetSinhVienLHP{handler: handler}
+	self39.processorMap["delLopHP"] = &managerStudentProcessorDelLopHP{handler: handler}
+	self39.processorMap["putSVOutLopHP"] = &managerStudentProcessorPutSVOutLopHP{handler: handler}
+	self39.processorMap["addSinhVien"] = &managerStudentProcessorAddSinhVien{handler: handler}
+	self39.processorMap["existsSinhVien"] = &managerStudentProcessorExistsSinhVien{handler: handler}
+	self39.processorMap["getSinhVien"] = &managerStudentProcessorGetSinhVien{handler: handler}
+	self39.processorMap["delSinhVien"] = &managerStudentProcessorDelSinhVien{handler: handler}
+	self39.processorMap["searchSinhVien"] = &managerStudentProcessorSearchSinhVien{handler: handler}
+	self39.processorMap["UpdateSinhVien"] = &managerStudentProcessorUpdateSinhVien{handler: handler}
+	self39.processorMap["UpdateLopHP"] = &managerStudentProcessorUpdateLopHP{handler: handler}
+	return self39
 }
 
 func (p *ManagerStudentProcessor) Process(ctx context.Context, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
@@ -850,12 +1003,12 @@ func (p *ManagerStudentProcessor) Process(ctx context.Context, iprot, oprot thri
 	}
 	iprot.Skip(thrift.STRUCT)
 	iprot.ReadMessageEnd()
-	x34 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
+	x40 := thrift.NewTApplicationException(thrift.UNKNOWN_METHOD, "Unknown function "+name)
 	oprot.WriteMessageBegin(name, thrift.EXCEPTION, seqId)
-	x34.Write(oprot)
+	x40.Write(oprot)
 	oprot.WriteMessageEnd()
 	oprot.Flush(ctx)
-	return false, x34
+	return false, x40
 
 }
 
@@ -904,16 +1057,16 @@ func (p *managerStudentProcessorInit) Process(ctx context.Context, seqId int32, 
 	return true, err
 }
 
-type managerStudentProcessorPutLopHP struct {
+type managerStudentProcessorAddLopHP struct {
 	handler ManagerStudent
 }
 
-func (p *managerStudentProcessorPutLopHP) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := ManagerStudentPutLopHPArgs{}
+func (p *managerStudentProcessorAddLopHP) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := ManagerStudentAddLopHPArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("putLopHP", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("addLopHP", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -921,12 +1074,12 @@ func (p *managerStudentProcessorPutLopHP) Process(ctx context.Context, seqId int
 	}
 
 	iprot.ReadMessageEnd()
-	result := ManagerStudentPutLopHPResult{}
+	result := ManagerStudentAddLopHPResult{}
 	var retval int32
 	var err2 error
-	if retval, err2 = p.handler.PutLopHP(ctx, args.LopHP); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing putLopHP: "+err2.Error())
-		oprot.WriteMessageBegin("putLopHP", thrift.EXCEPTION, seqId)
+	if retval, err2 = p.handler.AddLopHP(ctx, args.LopHP); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing addLopHP: "+err2.Error())
+		oprot.WriteMessageBegin("addLopHP", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -934,7 +1087,7 @@ func (p *managerStudentProcessorPutLopHP) Process(ctx context.Context, seqId int
 	} else {
 		result.Success = &retval
 	}
-	if err2 = oprot.WriteMessageBegin("putLopHP", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("addLopHP", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1240,6 +1393,54 @@ func (p *managerStudentProcessorGetLopHocPhanSlice) Process(ctx context.Context,
 	return true, err
 }
 
+type managerStudentProcessorGetLopHocPhanOfSinhVien struct {
+	handler ManagerStudent
+}
+
+func (p *managerStudentProcessorGetLopHocPhanOfSinhVien) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := ManagerStudentGetLopHocPhanOfSinhVienArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("getLopHocPhanOfSinhVien", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	result := ManagerStudentGetLopHocPhanOfSinhVienResult{}
+	var retval LopHocPhanSlices
+	var err2 error
+	if retval, err2 = p.handler.GetLopHocPhanOfSinhVien(ctx, args.Ma); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing getLopHocPhanOfSinhVien: "+err2.Error())
+		oprot.WriteMessageBegin("getLopHocPhanOfSinhVien", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = retval
+	}
+	if err2 = oprot.WriteMessageBegin("getLopHocPhanOfSinhVien", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
 type managerStudentProcessorGetSinhVienLHP struct {
 	handler ManagerStudent
 }
@@ -1384,16 +1585,16 @@ func (p *managerStudentProcessorPutSVOutLopHP) Process(ctx context.Context, seqI
 	return true, err
 }
 
-type managerStudentProcessorPutSinhVien struct {
+type managerStudentProcessorAddSinhVien struct {
 	handler ManagerStudent
 }
 
-func (p *managerStudentProcessorPutSinhVien) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
-	args := ManagerStudentPutSinhVienArgs{}
+func (p *managerStudentProcessorAddSinhVien) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := ManagerStudentAddSinhVienArgs{}
 	if err = args.Read(iprot); err != nil {
 		iprot.ReadMessageEnd()
 		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
-		oprot.WriteMessageBegin("putSinhVien", thrift.EXCEPTION, seqId)
+		oprot.WriteMessageBegin("addSinhVien", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1401,12 +1602,12 @@ func (p *managerStudentProcessorPutSinhVien) Process(ctx context.Context, seqId 
 	}
 
 	iprot.ReadMessageEnd()
-	result := ManagerStudentPutSinhVienResult{}
+	result := ManagerStudentAddSinhVienResult{}
 	var retval int32
 	var err2 error
-	if retval, err2 = p.handler.PutSinhVien(ctx, args.Sv); err2 != nil {
-		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing putSinhVien: "+err2.Error())
-		oprot.WriteMessageBegin("putSinhVien", thrift.EXCEPTION, seqId)
+	if retval, err2 = p.handler.AddSinhVien(ctx, args.Sv); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing addSinhVien: "+err2.Error())
+		oprot.WriteMessageBegin("addSinhVien", thrift.EXCEPTION, seqId)
 		x.Write(oprot)
 		oprot.WriteMessageEnd()
 		oprot.Flush(ctx)
@@ -1414,7 +1615,7 @@ func (p *managerStudentProcessorPutSinhVien) Process(ctx context.Context, seqId 
 	} else {
 		result.Success = &retval
 	}
-	if err2 = oprot.WriteMessageBegin("putSinhVien", thrift.REPLY, seqId); err2 != nil {
+	if err2 = oprot.WriteMessageBegin("addSinhVien", thrift.REPLY, seqId); err2 != nil {
 		err = err2
 	}
 	if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -1624,6 +1825,102 @@ func (p *managerStudentProcessorSearchSinhVien) Process(ctx context.Context, seq
 	return true, err
 }
 
+type managerStudentProcessorUpdateSinhVien struct {
+	handler ManagerStudent
+}
+
+func (p *managerStudentProcessorUpdateSinhVien) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := ManagerStudentUpdateSinhVienArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("UpdateSinhVien", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	result := ManagerStudentUpdateSinhVienResult{}
+	var retval int32
+	var err2 error
+	if retval, err2 = p.handler.UpdateSinhVien(ctx, args.Sv); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing UpdateSinhVien: "+err2.Error())
+		oprot.WriteMessageBegin("UpdateSinhVien", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = &retval
+	}
+	if err2 = oprot.WriteMessageBegin("UpdateSinhVien", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
+type managerStudentProcessorUpdateLopHP struct {
+	handler ManagerStudent
+}
+
+func (p *managerStudentProcessorUpdateLopHP) Process(ctx context.Context, seqId int32, iprot, oprot thrift.TProtocol) (success bool, err thrift.TException) {
+	args := ManagerStudentUpdateLopHPArgs{}
+	if err = args.Read(iprot); err != nil {
+		iprot.ReadMessageEnd()
+		x := thrift.NewTApplicationException(thrift.PROTOCOL_ERROR, err.Error())
+		oprot.WriteMessageBegin("UpdateLopHP", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return false, err
+	}
+
+	iprot.ReadMessageEnd()
+	result := ManagerStudentUpdateLopHPResult{}
+	var retval int32
+	var err2 error
+	if retval, err2 = p.handler.UpdateLopHP(ctx, args.Lhp); err2 != nil {
+		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing UpdateLopHP: "+err2.Error())
+		oprot.WriteMessageBegin("UpdateLopHP", thrift.EXCEPTION, seqId)
+		x.Write(oprot)
+		oprot.WriteMessageEnd()
+		oprot.Flush(ctx)
+		return true, err2
+	} else {
+		result.Success = &retval
+	}
+	if err2 = oprot.WriteMessageBegin("UpdateLopHP", thrift.REPLY, seqId); err2 != nil {
+		err = err2
+	}
+	if err2 = result.Write(oprot); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
+		err = err2
+	}
+	if err2 = oprot.Flush(ctx); err == nil && err2 != nil {
+		err = err2
+	}
+	if err != nil {
+		return
+	}
+	return true, err
+}
+
 // HELPER FUNCTIONS AND STRUCTURES
 
 type ManagerStudentInitArgs struct {
@@ -1738,27 +2035,27 @@ func (p *ManagerStudentInitResult) String() string {
 
 // Attributes:
 //  - LopHP
-type ManagerStudentPutLopHPArgs struct {
+type ManagerStudentAddLopHPArgs struct {
 	LopHP *LopHocPhan `thrift:"lopHP,1" db:"lopHP" json:"lopHP"`
 }
 
-func NewManagerStudentPutLopHPArgs() *ManagerStudentPutLopHPArgs {
-	return &ManagerStudentPutLopHPArgs{}
+func NewManagerStudentAddLopHPArgs() *ManagerStudentAddLopHPArgs {
+	return &ManagerStudentAddLopHPArgs{}
 }
 
-var ManagerStudentPutLopHPArgs_LopHP_DEFAULT *LopHocPhan
+var ManagerStudentAddLopHPArgs_LopHP_DEFAULT *LopHocPhan
 
-func (p *ManagerStudentPutLopHPArgs) GetLopHP() *LopHocPhan {
+func (p *ManagerStudentAddLopHPArgs) GetLopHP() *LopHocPhan {
 	if !p.IsSetLopHP() {
-		return ManagerStudentPutLopHPArgs_LopHP_DEFAULT
+		return ManagerStudentAddLopHPArgs_LopHP_DEFAULT
 	}
 	return p.LopHP
 }
-func (p *ManagerStudentPutLopHPArgs) IsSetLopHP() bool {
+func (p *ManagerStudentAddLopHPArgs) IsSetLopHP() bool {
 	return p.LopHP != nil
 }
 
-func (p *ManagerStudentPutLopHPArgs) Read(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddLopHPArgs) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -1797,7 +2094,7 @@ func (p *ManagerStudentPutLopHPArgs) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPArgs) ReadField1(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddLopHPArgs) ReadField1(iprot thrift.TProtocol) error {
 	p.LopHP = &LopHocPhan{}
 	if err := p.LopHP.Read(iprot); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.LopHP), err)
@@ -1805,8 +2102,8 @@ func (p *ManagerStudentPutLopHPArgs) ReadField1(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPArgs) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("putLopHP_args"); err != nil {
+func (p *ManagerStudentAddLopHPArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("addLopHP_args"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -1823,7 +2120,7 @@ func (p *ManagerStudentPutLopHPArgs) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *ManagerStudentAddLopHPArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("lopHP", thrift.STRUCT, 1); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:lopHP: ", p), err)
 	}
@@ -1836,36 +2133,36 @@ func (p *ManagerStudentPutLopHPArgs) writeField1(oprot thrift.TProtocol) (err er
 	return err
 }
 
-func (p *ManagerStudentPutLopHPArgs) String() string {
+func (p *ManagerStudentAddLopHPArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ManagerStudentPutLopHPArgs(%+v)", *p)
+	return fmt.Sprintf("ManagerStudentAddLopHPArgs(%+v)", *p)
 }
 
 // Attributes:
 //  - Success
-type ManagerStudentPutLopHPResult struct {
+type ManagerStudentAddLopHPResult struct {
 	Success *int32 `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
-func NewManagerStudentPutLopHPResult() *ManagerStudentPutLopHPResult {
-	return &ManagerStudentPutLopHPResult{}
+func NewManagerStudentAddLopHPResult() *ManagerStudentAddLopHPResult {
+	return &ManagerStudentAddLopHPResult{}
 }
 
-var ManagerStudentPutLopHPResult_Success_DEFAULT int32
+var ManagerStudentAddLopHPResult_Success_DEFAULT int32
 
-func (p *ManagerStudentPutLopHPResult) GetSuccess() int32 {
+func (p *ManagerStudentAddLopHPResult) GetSuccess() int32 {
 	if !p.IsSetSuccess() {
-		return ManagerStudentPutLopHPResult_Success_DEFAULT
+		return ManagerStudentAddLopHPResult_Success_DEFAULT
 	}
 	return *p.Success
 }
-func (p *ManagerStudentPutLopHPResult) IsSetSuccess() bool {
+func (p *ManagerStudentAddLopHPResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *ManagerStudentPutLopHPResult) Read(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddLopHPResult) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -1904,7 +2201,7 @@ func (p *ManagerStudentPutLopHPResult) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPResult) ReadField0(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddLopHPResult) ReadField0(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI32(); err != nil {
 		return thrift.PrependError("error reading field 0: ", err)
 	} else {
@@ -1913,8 +2210,8 @@ func (p *ManagerStudentPutLopHPResult) ReadField0(iprot thrift.TProtocol) error 
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPResult) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("putLopHP_result"); err != nil {
+func (p *ManagerStudentAddLopHPResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("addLopHP_result"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -1931,7 +2228,7 @@ func (p *ManagerStudentPutLopHPResult) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutLopHPResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *ManagerStudentAddLopHPResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
@@ -1946,41 +2243,32 @@ func (p *ManagerStudentPutLopHPResult) writeField0(oprot thrift.TProtocol) (err 
 	return err
 }
 
-func (p *ManagerStudentPutLopHPResult) String() string {
+func (p *ManagerStudentAddLopHPResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ManagerStudentPutLopHPResult(%+v)", *p)
+	return fmt.Sprintf("ManagerStudentAddLopHPResult(%+v)", *p)
 }
 
 // Attributes:
 //  - Sv
 //  - MaLHP
 type ManagerStudentAddSinhVienVaoLopArgs struct {
-	Sv    *SinhVien `thrift:"sv,1" db:"sv" json:"sv"`
-	MaLHP string    `thrift:"maLHP,2" db:"maLHP" json:"maLHP"`
+	Sv    string `thrift:"sv,1" db:"sv" json:"sv"`
+	MaLHP string `thrift:"maLHP,2" db:"maLHP" json:"maLHP"`
 }
 
 func NewManagerStudentAddSinhVienVaoLopArgs() *ManagerStudentAddSinhVienVaoLopArgs {
 	return &ManagerStudentAddSinhVienVaoLopArgs{}
 }
 
-var ManagerStudentAddSinhVienVaoLopArgs_Sv_DEFAULT *SinhVien
-
-func (p *ManagerStudentAddSinhVienVaoLopArgs) GetSv() *SinhVien {
-	if !p.IsSetSv() {
-		return ManagerStudentAddSinhVienVaoLopArgs_Sv_DEFAULT
-	}
+func (p *ManagerStudentAddSinhVienVaoLopArgs) GetSv() string {
 	return p.Sv
 }
 
 func (p *ManagerStudentAddSinhVienVaoLopArgs) GetMaLHP() string {
 	return p.MaLHP
 }
-func (p *ManagerStudentAddSinhVienVaoLopArgs) IsSetSv() bool {
-	return p.Sv != nil
-}
-
 func (p *ManagerStudentAddSinhVienVaoLopArgs) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
@@ -1996,7 +2284,7 @@ func (p *ManagerStudentAddSinhVienVaoLopArgs) Read(iprot thrift.TProtocol) error
 		}
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.STRING {
 				if err := p.ReadField1(iprot); err != nil {
 					return err
 				}
@@ -2031,9 +2319,10 @@ func (p *ManagerStudentAddSinhVienVaoLopArgs) Read(iprot thrift.TProtocol) error
 }
 
 func (p *ManagerStudentAddSinhVienVaoLopArgs) ReadField1(iprot thrift.TProtocol) error {
-	p.Sv = &SinhVien{}
-	if err := p.Sv.Read(iprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Sv), err)
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Sv = v
 	}
 	return nil
 }
@@ -2069,11 +2358,11 @@ func (p *ManagerStudentAddSinhVienVaoLopArgs) Write(oprot thrift.TProtocol) erro
 }
 
 func (p *ManagerStudentAddSinhVienVaoLopArgs) writeField1(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("sv", thrift.STRUCT, 1); err != nil {
+	if err := oprot.WriteFieldBegin("sv", thrift.STRING, 1); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:sv: ", p), err)
 	}
-	if err := p.Sv.Write(oprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Sv), err)
+	if err := oprot.WriteString(string(p.Sv)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.sv (1) field write error: ", p), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:sv: ", p), err)
@@ -2287,11 +2576,11 @@ func (p *ManagerStudentAddSinhVienSlicesVaoLopArgs) ReadField1(iprot thrift.TPro
 	tSlice := make(SinhVienSlices, 0, size)
 	p.Lsv = tSlice
 	for i := 0; i < size; i++ {
-		_elem35 := &SinhVien{}
-		if err := _elem35.Read(iprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem35), err)
+		_elem41 := &SinhVien{}
+		if err := _elem41.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem41), err)
 		}
-		p.Lsv = append(p.Lsv, _elem35)
+		p.Lsv = append(p.Lsv, _elem41)
 	}
 	if err := iprot.ReadListEnd(); err != nil {
 		return thrift.PrependError("error reading list end: ", err)
@@ -3268,11 +3557,11 @@ func (p *ManagerStudentGetLopHocPhanSliceResult) ReadField0(iprot thrift.TProtoc
 	tSlice := make(LopHocPhanSlices, 0, size)
 	p.Success = tSlice
 	for i := 0; i < size; i++ {
-		_elem36 := &LopHocPhan{}
-		if err := _elem36.Read(iprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem36), err)
+		_elem42 := &LopHocPhan{}
+		if err := _elem42.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem42), err)
 		}
-		p.Success = append(p.Success, _elem36)
+		p.Success = append(p.Success, _elem42)
 	}
 	if err := iprot.ReadListEnd(); err != nil {
 		return thrift.PrependError("error reading list end: ", err)
@@ -3326,6 +3615,231 @@ func (p *ManagerStudentGetLopHocPhanSliceResult) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("ManagerStudentGetLopHocPhanSliceResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Ma
+type ManagerStudentGetLopHocPhanOfSinhVienArgs struct {
+	Ma string `thrift:"ma,1" db:"ma" json:"ma"`
+}
+
+func NewManagerStudentGetLopHocPhanOfSinhVienArgs() *ManagerStudentGetLopHocPhanOfSinhVienArgs {
+	return &ManagerStudentGetLopHocPhanOfSinhVienArgs{}
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) GetMa() string {
+	return p.Ma
+}
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return thrift.PrependError("error reading field 1: ", err)
+	} else {
+		p.Ma = v
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("getLopHocPhanOfSinhVien_args"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("ma", thrift.STRING, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:ma: ", p), err)
+	}
+	if err := oprot.WriteString(string(p.Ma)); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T.ma (1) field write error: ", p), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:ma: ", p), err)
+	}
+	return err
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentGetLopHocPhanOfSinhVienArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+type ManagerStudentGetLopHocPhanOfSinhVienResult struct {
+	Success LopHocPhanSlices `thrift:"success,0" db:"success" json:"success,omitempty"`
+}
+
+func NewManagerStudentGetLopHocPhanOfSinhVienResult() *ManagerStudentGetLopHocPhanOfSinhVienResult {
+	return &ManagerStudentGetLopHocPhanOfSinhVienResult{}
+}
+
+var ManagerStudentGetLopHocPhanOfSinhVienResult_Success_DEFAULT LopHocPhanSlices
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) GetSuccess() LopHocPhanSlices {
+	return p.Success
+}
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.LIST {
+				if err := p.ReadField0(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) ReadField0(iprot thrift.TProtocol) error {
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return thrift.PrependError("error reading list begin: ", err)
+	}
+	tSlice := make(LopHocPhanSlices, 0, size)
+	p.Success = tSlice
+	for i := 0; i < size; i++ {
+		_elem43 := &LopHocPhan{}
+		if err := _elem43.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem43), err)
+		}
+		p.Success = append(p.Success, _elem43)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return thrift.PrependError("error reading list end: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("getLopHocPhanOfSinhVien_result"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField0(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err := oprot.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
+		}
+		if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Success)); err != nil {
+			return thrift.PrependError("error writing list begin: ", err)
+		}
+		for _, v := range p.Success {
+			if err := v.Write(oprot); err != nil {
+				return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
+			return thrift.PrependError("error writing list end: ", err)
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
+		}
+	}
+	return err
+}
+
+func (p *ManagerStudentGetLopHocPhanOfSinhVienResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentGetLopHocPhanOfSinhVienResult(%+v)", *p)
 }
 
 // Attributes:
@@ -3493,11 +4007,11 @@ func (p *ManagerStudentGetSinhVienLHPResult) ReadField0(iprot thrift.TProtocol) 
 	tSlice := make(SinhVienSlices, 0, size)
 	p.Success = tSlice
 	for i := 0; i < size; i++ {
-		_elem37 := &SinhVien{}
-		if err := _elem37.Read(iprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem37), err)
+		_elem44 := &SinhVien{}
+		if err := _elem44.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem44), err)
 		}
-		p.Success = append(p.Success, _elem37)
+		p.Success = append(p.Success, _elem44)
 	}
 	if err := iprot.ReadListEnd(); err != nil {
 		return thrift.PrependError("error reading list end: ", err)
@@ -4014,27 +4528,27 @@ func (p *ManagerStudentPutSVOutLopHPResult) String() string {
 
 // Attributes:
 //  - Sv
-type ManagerStudentPutSinhVienArgs struct {
+type ManagerStudentAddSinhVienArgs struct {
 	Sv *SinhVien `thrift:"sv,1" db:"sv" json:"sv"`
 }
 
-func NewManagerStudentPutSinhVienArgs() *ManagerStudentPutSinhVienArgs {
-	return &ManagerStudentPutSinhVienArgs{}
+func NewManagerStudentAddSinhVienArgs() *ManagerStudentAddSinhVienArgs {
+	return &ManagerStudentAddSinhVienArgs{}
 }
 
-var ManagerStudentPutSinhVienArgs_Sv_DEFAULT *SinhVien
+var ManagerStudentAddSinhVienArgs_Sv_DEFAULT *SinhVien
 
-func (p *ManagerStudentPutSinhVienArgs) GetSv() *SinhVien {
+func (p *ManagerStudentAddSinhVienArgs) GetSv() *SinhVien {
 	if !p.IsSetSv() {
-		return ManagerStudentPutSinhVienArgs_Sv_DEFAULT
+		return ManagerStudentAddSinhVienArgs_Sv_DEFAULT
 	}
 	return p.Sv
 }
-func (p *ManagerStudentPutSinhVienArgs) IsSetSv() bool {
+func (p *ManagerStudentAddSinhVienArgs) IsSetSv() bool {
 	return p.Sv != nil
 }
 
-func (p *ManagerStudentPutSinhVienArgs) Read(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddSinhVienArgs) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -4073,7 +4587,7 @@ func (p *ManagerStudentPutSinhVienArgs) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienArgs) ReadField1(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddSinhVienArgs) ReadField1(iprot thrift.TProtocol) error {
 	p.Sv = &SinhVien{}
 	if err := p.Sv.Read(iprot); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Sv), err)
@@ -4081,8 +4595,8 @@ func (p *ManagerStudentPutSinhVienArgs) ReadField1(iprot thrift.TProtocol) error
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienArgs) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("putSinhVien_args"); err != nil {
+func (p *ManagerStudentAddSinhVienArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("addSinhVien_args"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -4099,7 +4613,7 @@ func (p *ManagerStudentPutSinhVienArgs) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienArgs) writeField1(oprot thrift.TProtocol) (err error) {
+func (p *ManagerStudentAddSinhVienArgs) writeField1(oprot thrift.TProtocol) (err error) {
 	if err := oprot.WriteFieldBegin("sv", thrift.STRUCT, 1); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:sv: ", p), err)
 	}
@@ -4112,36 +4626,36 @@ func (p *ManagerStudentPutSinhVienArgs) writeField1(oprot thrift.TProtocol) (err
 	return err
 }
 
-func (p *ManagerStudentPutSinhVienArgs) String() string {
+func (p *ManagerStudentAddSinhVienArgs) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ManagerStudentPutSinhVienArgs(%+v)", *p)
+	return fmt.Sprintf("ManagerStudentAddSinhVienArgs(%+v)", *p)
 }
 
 // Attributes:
 //  - Success
-type ManagerStudentPutSinhVienResult struct {
+type ManagerStudentAddSinhVienResult struct {
 	Success *int32 `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
-func NewManagerStudentPutSinhVienResult() *ManagerStudentPutSinhVienResult {
-	return &ManagerStudentPutSinhVienResult{}
+func NewManagerStudentAddSinhVienResult() *ManagerStudentAddSinhVienResult {
+	return &ManagerStudentAddSinhVienResult{}
 }
 
-var ManagerStudentPutSinhVienResult_Success_DEFAULT int32
+var ManagerStudentAddSinhVienResult_Success_DEFAULT int32
 
-func (p *ManagerStudentPutSinhVienResult) GetSuccess() int32 {
+func (p *ManagerStudentAddSinhVienResult) GetSuccess() int32 {
 	if !p.IsSetSuccess() {
-		return ManagerStudentPutSinhVienResult_Success_DEFAULT
+		return ManagerStudentAddSinhVienResult_Success_DEFAULT
 	}
 	return *p.Success
 }
-func (p *ManagerStudentPutSinhVienResult) IsSetSuccess() bool {
+func (p *ManagerStudentAddSinhVienResult) IsSetSuccess() bool {
 	return p.Success != nil
 }
 
-func (p *ManagerStudentPutSinhVienResult) Read(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddSinhVienResult) Read(iprot thrift.TProtocol) error {
 	if _, err := iprot.ReadStructBegin(); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
 	}
@@ -4180,7 +4694,7 @@ func (p *ManagerStudentPutSinhVienResult) Read(iprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienResult) ReadField0(iprot thrift.TProtocol) error {
+func (p *ManagerStudentAddSinhVienResult) ReadField0(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadI32(); err != nil {
 		return thrift.PrependError("error reading field 0: ", err)
 	} else {
@@ -4189,8 +4703,8 @@ func (p *ManagerStudentPutSinhVienResult) ReadField0(iprot thrift.TProtocol) err
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienResult) Write(oprot thrift.TProtocol) error {
-	if err := oprot.WriteStructBegin("putSinhVien_result"); err != nil {
+func (p *ManagerStudentAddSinhVienResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("addSinhVien_result"); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
 	}
 	if p != nil {
@@ -4207,7 +4721,7 @@ func (p *ManagerStudentPutSinhVienResult) Write(oprot thrift.TProtocol) error {
 	return nil
 }
 
-func (p *ManagerStudentPutSinhVienResult) writeField0(oprot thrift.TProtocol) (err error) {
+func (p *ManagerStudentAddSinhVienResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
 		if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
@@ -4222,11 +4736,11 @@ func (p *ManagerStudentPutSinhVienResult) writeField0(oprot thrift.TProtocol) (e
 	return err
 }
 
-func (p *ManagerStudentPutSinhVienResult) String() string {
+func (p *ManagerStudentAddSinhVienResult) String() string {
 	if p == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("ManagerStudentPutSinhVienResult(%+v)", *p)
+	return fmt.Sprintf("ManagerStudentAddSinhVienResult(%+v)", *p)
 }
 
 // Attributes:
@@ -5020,11 +5534,11 @@ func (p *ManagerStudentSearchSinhVienResult) ReadField0(iprot thrift.TProtocol) 
 	tSlice := make(SinhVienSlices, 0, size)
 	p.Success = tSlice
 	for i := 0; i < size; i++ {
-		_elem38 := &SinhVien{}
-		if err := _elem38.Read(iprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem38), err)
+		_elem45 := &SinhVien{}
+		if err := _elem45.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem45), err)
 		}
-		p.Success = append(p.Success, _elem38)
+		p.Success = append(p.Success, _elem45)
 	}
 	if err := iprot.ReadListEnd(); err != nil {
 		return thrift.PrependError("error reading list end: ", err)
@@ -5078,4 +5592,438 @@ func (p *ManagerStudentSearchSinhVienResult) String() string {
 		return "<nil>"
 	}
 	return fmt.Sprintf("ManagerStudentSearchSinhVienResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Sv
+type ManagerStudentUpdateSinhVienArgs struct {
+	Sv *SinhVien `thrift:"sv,1" db:"sv" json:"sv"`
+}
+
+func NewManagerStudentUpdateSinhVienArgs() *ManagerStudentUpdateSinhVienArgs {
+	return &ManagerStudentUpdateSinhVienArgs{}
+}
+
+var ManagerStudentUpdateSinhVienArgs_Sv_DEFAULT *SinhVien
+
+func (p *ManagerStudentUpdateSinhVienArgs) GetSv() *SinhVien {
+	if !p.IsSetSv() {
+		return ManagerStudentUpdateSinhVienArgs_Sv_DEFAULT
+	}
+	return p.Sv
+}
+func (p *ManagerStudentUpdateSinhVienArgs) IsSetSv() bool {
+	return p.Sv != nil
+}
+
+func (p *ManagerStudentUpdateSinhVienArgs) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienArgs) ReadField1(iprot thrift.TProtocol) error {
+	p.Sv = &SinhVien{}
+	if err := p.Sv.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Sv), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("UpdateSinhVien_args"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("sv", thrift.STRUCT, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:sv: ", p), err)
+	}
+	if err := p.Sv.Write(oprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Sv), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:sv: ", p), err)
+	}
+	return err
+}
+
+func (p *ManagerStudentUpdateSinhVienArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentUpdateSinhVienArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+type ManagerStudentUpdateSinhVienResult struct {
+	Success *int32 `thrift:"success,0" db:"success" json:"success,omitempty"`
+}
+
+func NewManagerStudentUpdateSinhVienResult() *ManagerStudentUpdateSinhVienResult {
+	return &ManagerStudentUpdateSinhVienResult{}
+}
+
+var ManagerStudentUpdateSinhVienResult_Success_DEFAULT int32
+
+func (p *ManagerStudentUpdateSinhVienResult) GetSuccess() int32 {
+	if !p.IsSetSuccess() {
+		return ManagerStudentUpdateSinhVienResult_Success_DEFAULT
+	}
+	return *p.Success
+}
+func (p *ManagerStudentUpdateSinhVienResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *ManagerStudentUpdateSinhVienResult) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.I32 {
+				if err := p.ReadField0(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienResult) ReadField0(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return thrift.PrependError("error reading field 0: ", err)
+	} else {
+		p.Success = &v
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("UpdateSinhVien_result"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField0(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateSinhVienResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
+		}
+		if err := oprot.WriteI32(int32(*p.Success)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err)
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
+		}
+	}
+	return err
+}
+
+func (p *ManagerStudentUpdateSinhVienResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentUpdateSinhVienResult(%+v)", *p)
+}
+
+// Attributes:
+//  - Lhp
+type ManagerStudentUpdateLopHPArgs struct {
+	Lhp *LopHocPhan `thrift:"lhp,1" db:"lhp" json:"lhp"`
+}
+
+func NewManagerStudentUpdateLopHPArgs() *ManagerStudentUpdateLopHPArgs {
+	return &ManagerStudentUpdateLopHPArgs{}
+}
+
+var ManagerStudentUpdateLopHPArgs_Lhp_DEFAULT *LopHocPhan
+
+func (p *ManagerStudentUpdateLopHPArgs) GetLhp() *LopHocPhan {
+	if !p.IsSetLhp() {
+		return ManagerStudentUpdateLopHPArgs_Lhp_DEFAULT
+	}
+	return p.Lhp
+}
+func (p *ManagerStudentUpdateLopHPArgs) IsSetLhp() bool {
+	return p.Lhp != nil
+}
+
+func (p *ManagerStudentUpdateLopHPArgs) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRUCT {
+				if err := p.ReadField1(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPArgs) ReadField1(iprot thrift.TProtocol) error {
+	p.Lhp = &LopHocPhan{}
+	if err := p.Lhp.Read(iprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Lhp), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPArgs) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("UpdateLopHP_args"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField1(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPArgs) writeField1(oprot thrift.TProtocol) (err error) {
+	if err := oprot.WriteFieldBegin("lhp", thrift.STRUCT, 1); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:lhp: ", p), err)
+	}
+	if err := p.Lhp.Write(oprot); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Lhp), err)
+	}
+	if err := oprot.WriteFieldEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write field end error 1:lhp: ", p), err)
+	}
+	return err
+}
+
+func (p *ManagerStudentUpdateLopHPArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentUpdateLopHPArgs(%+v)", *p)
+}
+
+// Attributes:
+//  - Success
+type ManagerStudentUpdateLopHPResult struct {
+	Success *int32 `thrift:"success,0" db:"success" json:"success,omitempty"`
+}
+
+func NewManagerStudentUpdateLopHPResult() *ManagerStudentUpdateLopHPResult {
+	return &ManagerStudentUpdateLopHPResult{}
+}
+
+var ManagerStudentUpdateLopHPResult_Success_DEFAULT int32
+
+func (p *ManagerStudentUpdateLopHPResult) GetSuccess() int32 {
+	if !p.IsSetSuccess() {
+		return ManagerStudentUpdateLopHPResult_Success_DEFAULT
+	}
+	return *p.Success
+}
+func (p *ManagerStudentUpdateLopHPResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *ManagerStudentUpdateLopHPResult) Read(iprot thrift.TProtocol) error {
+	if _, err := iprot.ReadStructBegin(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+		if err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+		switch fieldId {
+		case 0:
+			if fieldTypeId == thrift.I32 {
+				if err := p.ReadField0(iprot); err != nil {
+					return err
+				}
+			} else {
+				if err := iprot.Skip(fieldTypeId); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := iprot.Skip(fieldTypeId); err != nil {
+				return err
+			}
+		}
+		if err := iprot.ReadFieldEnd(); err != nil {
+			return err
+		}
+	}
+	if err := iprot.ReadStructEnd(); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPResult) ReadField0(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI32(); err != nil {
+		return thrift.PrependError("error reading field 0: ", err)
+	} else {
+		p.Success = &v
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPResult) Write(oprot thrift.TProtocol) error {
+	if err := oprot.WriteStructBegin("UpdateLopHP_result"); err != nil {
+		return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+	}
+	if p != nil {
+		if err := p.writeField0(oprot); err != nil {
+			return err
+		}
+	}
+	if err := oprot.WriteFieldStop(); err != nil {
+		return thrift.PrependError("write field stop error: ", err)
+	}
+	if err := oprot.WriteStructEnd(); err != nil {
+		return thrift.PrependError("write struct stop error: ", err)
+	}
+	return nil
+}
+
+func (p *ManagerStudentUpdateLopHPResult) writeField0(oprot thrift.TProtocol) (err error) {
+	if p.IsSetSuccess() {
+		if err := oprot.WriteFieldBegin("success", thrift.I32, 0); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
+		}
+		if err := oprot.WriteI32(int32(*p.Success)); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T.success (0) field write error: ", p), err)
+		}
+		if err := oprot.WriteFieldEnd(); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)
+		}
+	}
+	return err
+}
+
+func (p *ManagerStudentUpdateLopHPResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("ManagerStudentUpdateLopHPResult(%+v)", *p)
 }

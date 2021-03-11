@@ -9,6 +9,15 @@ func init() {
 
 	beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"] = append(beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"],
 		beego.ControllerComments{
+			Method:           "UpdateClass",
+			Router:           "/class",
+			AllowHTTPMethods: []string{"put"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"] = append(beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"],
+		beego.ControllerComments{
 			Method:           "GetClass",
 			Router:           "/class/:ma",
 			AllowHTTPMethods: []string{"get"},
@@ -66,6 +75,15 @@ func init() {
 			Method:           "SearchStudent",
 			Router:           "/class/search/:key",
 			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"] = append(beego.GlobalControllerRouter["managerStudent/src/beeApi/controllers/myController:ManagerController"],
+		beego.ControllerComments{
+			Method:           "UpdateStudent",
+			Router:           "/student",
+			AllowHTTPMethods: []string{"put"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})

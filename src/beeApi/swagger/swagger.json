@@ -15,6 +15,34 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/manager/class": {
+            "put": {
+                "tags": [
+                    "manager"
+                ],
+                "description": "create users",
+                "operationId": "ManagerController.UpdateClass",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "sv",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LopHocPhan"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{int} 1"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/manager/class/add-student/{ma_lop}": {
             "put": {
                 "tags": [
@@ -25,19 +53,12 @@
                 "parameters": [
                     {
                         "in": "body",
-                        "name": "sv",
+                        "name": "ma_sv",
                         "description": "body for Class content",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SinhVien"
+                            "$ref": "#/definitions/models.SinhVienVaLop"
                         }
-                    },
-                    {
-                        "in": "path",
-                        "name": "ma_lop",
-                        "description": "The key for staticblock",
-                        "required": true,
-                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -219,6 +240,34 @@
                     },
                     "403": {
                         "description": ":uid is empty"
+                    }
+                }
+            }
+        },
+        "/manager/student": {
+            "put": {
+                "tags": [
+                    "manager"
+                ],
+                "description": "create users",
+                "operationId": "ManagerController.UpdateSinhVien",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "sv",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SinhVien"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{int} 1"
+                    },
+                    "403": {
+                        "description": "body is empty"
                     }
                 }
             }
@@ -487,17 +536,14 @@
         }
     },
     "definitions": {
-        "models.\u0026{277 SinhVien}": {
-            "title": "\u0026{277 SinhVien}",
+        "models.\u0026{437 SinhVien}": {
+            "title": "\u0026{437 SinhVien}",
             "type": "object"
         },
         "models.LopHocPhan": {
             "title": "LopHocPhan",
             "type": "object",
             "properties": {
-                "DsSinhVien": {
-                    "$ref": "#/definitions/models.SinhVienSlices"
-                },
                 "GiaoVien": {
                     "type": "string"
                 },
@@ -554,7 +600,19 @@
             "title": "SinhVienSlices",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.\u0026{277 SinhVien}"
+                "$ref": "#/definitions/models.\u0026{437 SinhVien}"
+            }
+        },
+        "models.SinhVienVaLop": {
+            "title": "SinhVienVaLop",
+            "type": "object",
+            "properties": {
+                "MaLHP": {
+                    "type": "string"
+                },
+                "MaSV": {
+                    "type": "string"
+                }
             }
         },
         "models.User": {

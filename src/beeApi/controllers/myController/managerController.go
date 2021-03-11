@@ -38,7 +38,7 @@ func (u *ManagerController) CreateStudent() {
 	if err != nil {
 		log.Fatal("Error Convert To Json")
 	}
-	uid, err := models.GetClient().PutSinhVien(defaultCtx, &sv)
+	uid, err := models.GetClient().AddSinhVien(defaultCtx, &sv)
 	if err != nil {
 		log.Println(err)
 	}
@@ -58,7 +58,7 @@ func (u *ManagerController) CreateClass() {
 	if err != nil {
 		log.Fatal("Error Convert To Json")
 	}
-	uid, err := models.GetClient().PutLopHP(defaultCtx, &lhp)
+	uid, err := models.GetClient().AddLopHP(defaultCtx, &lhp)
 	if err != nil {
 		log.Println(err)
 	}
@@ -68,20 +68,20 @@ func (u *ManagerController) CreateClass() {
 
 // @Title AddStudentToClass
 // @Description Add a student to class
-// @Param	sv		body  models.SinhVien	true		"body for Class content"
-// @Param	ma_lop		path 	string	true		"The key for staticblock"
+// @Param	ma_sv	body  models.SinhVienVaLop	true		"body for Class content"
 // @Success 200 {string} result
 // @Failure 403 body is empty
 // @router /class/add-student/:ma_lop [put]
 func (u *ManagerController) AddStudentToClass() {
-	var sv apiservice.SinhVien
+	var sv models.SinhVienVaLop
 	err := json.Unmarshal(u.Ctx.Input.RequestBody, &sv)
 	if err != nil {
-		log.Fatal("Error Convert To Json")
+		log.Fatal("Error Convert To Json + ", err)
 	}
-	idC := u.GetString(":ma_lop")
+	idC := sv.MaLHP
+	idS := sv.MaSV
 	log.Println("ma lop ", idC)
-	uid, err := models.GetClient().AddSinhVienVaoLop(defaultCtx, &sv, idC)
+	uid, err := models.GetClient().AddSinhVienVaoLop(defaultCtx, idS, idC)
 	if err != nil {
 		log.Println(err)
 	}
@@ -222,5 +222,45 @@ func (u *ManagerController) SearchStudent() {
 			u.Data["json"] = user
 		}
 	}
+	u.ServeJSON()
+}
+
+// @Title UpdateSinhVien
+// @Description create users
+// @Param	sv		body 	models.SinhVien	true		"The key for staticblock"
+// @Success 200 {int} 1
+// @Failure 403 body is empty
+// @router /student [put]
+func (u *ManagerController) UpdateStudent() {
+	var sv apiservice.SinhVien
+	err := json.Unmarshal(u.Ctx.Input.RequestBody, &sv)
+	if err != nil {
+		log.Fatal("Error Convert To Json")
+	}
+	uid, err := models.GetClient().UpdateSinhVien(defaultCtx, &sv)
+	if err != nil {
+		log.Println(err)
+	}
+	u.Data["json"] = map[string]int32{"State": uid}
+	u.ServeJSON()
+}
+
+// @Title UpdateClass
+// @Description create users
+// @Param	sv		body 	models.LopHocPhan	true		"The key for staticblock"
+// @Success 200 {int} 1
+// @Failure 403 body is empty
+// @router /class [put]
+func (u *ManagerController) UpdateClass() {
+	var lhp apiservice.LopHocPhan
+	err := json.Unmarshal(u.Ctx.Input.RequestBody, &lhp)
+	if err != nil {
+		log.Fatal("Error Convert To Json")
+	}
+	uid, err := models.GetClient().UpdateLopHP(defaultCtx, &lhp)
+	if err != nil {
+		log.Println(err)
+	}
+	u.Data["json"] = map[string]int32{"State": uid}
 	u.ServeJSON()
 }

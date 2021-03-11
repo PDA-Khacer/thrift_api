@@ -11,6 +11,24 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
+  /manager/class:
+    put:
+      tags:
+      - manager
+      description: create users
+      operationId: ManagerController.UpdateClass
+      parameters:
+      - in: body
+        name: sv
+        description: The key for staticblock
+        required: true
+        schema:
+          $ref: '#/definitions/models.LopHocPhan'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
   /manager/class/{ma}:
     get:
       tags:
@@ -38,16 +56,11 @@ paths:
       operationId: ManagerController.AddStudentToClass
       parameters:
       - in: body
-        name: sv
+        name: ma_sv
         description: body for Class content
         required: true
         schema:
-          $ref: '#/definitions/models.SinhVien'
-      - in: path
-        name: ma_lop
-        description: The key for staticblock
-        required: true
-        type: string
+          $ref: '#/definitions/models.SinhVienVaLop'
       responses:
         "200":
           description: '{string} result'
@@ -145,6 +158,24 @@ paths:
       responses:
         "200":
           description: '{string} models.SinhVienSlices'
+        "403":
+          description: body is empty
+  /manager/student:
+    put:
+      tags:
+      - manager
+      description: create users
+      operationId: ManagerController.UpdateSinhVien
+      parameters:
+      - in: body
+        name: sv
+        description: The key for staticblock
+        required: true
+        schema:
+          $ref: '#/definitions/models.SinhVien'
+      responses:
+        "200":
+          description: '{int} 1'
         "403":
           description: body is empty
   /manager/student/{ma}:
@@ -320,15 +351,13 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  models.&{277 SinhVien}:
-    title: '&{277 SinhVien}'
+  models.&{437 SinhVien}:
+    title: '&{437 SinhVien}'
     type: object
   models.LopHocPhan:
     title: LopHocPhan
     type: object
     properties:
-      DsSinhVien:
-        $ref: '#/definitions/models.SinhVienSlices'
       GiaoVien:
         type: string
       Ma:
@@ -367,7 +396,15 @@ definitions:
     title: SinhVienSlices
     type: array
     items:
-      $ref: '#/definitions/models.&{277 SinhVien}'
+      $ref: '#/definitions/models.&{437 SinhVien}'
+  models.SinhVienVaLop:
+    title: SinhVienVaLop
+    type: object
+    properties:
+      MaLHP:
+        type: string
+      MaSV:
+        type: string
   models.User:
     title: User
     type: object

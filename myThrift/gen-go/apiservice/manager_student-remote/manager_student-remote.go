@@ -24,21 +24,24 @@ func Usage() {
 	flag.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "\nFunctions:")
 	fmt.Fprintln(os.Stderr, "  void init()")
-	fmt.Fprintln(os.Stderr, "  i32 putLopHP(LopHocPhan lopHP)")
-	fmt.Fprintln(os.Stderr, "  i32 addSinhVienVaoLop(SinhVien sv, string maLHP)")
+	fmt.Fprintln(os.Stderr, "  i32 addLopHP(LopHocPhan lopHP)")
+	fmt.Fprintln(os.Stderr, "  i32 addSinhVienVaoLop(string sv, string maLHP)")
 	fmt.Fprintln(os.Stderr, "  i32 addSinhVienSlicesVaoLop(SinhVienSlices lsv, string maLHP)")
 	fmt.Fprintln(os.Stderr, "  i32 existsLopHP(string maLHP)")
 	fmt.Fprintln(os.Stderr, "  i32 existsSinhVienTrongLop(string maLHP, string maSinhVien)")
 	fmt.Fprintln(os.Stderr, "  LopHocPhan getLopHocPhan(string ma)")
 	fmt.Fprintln(os.Stderr, "  LopHocPhanSlices getLopHocPhanSlice()")
+	fmt.Fprintln(os.Stderr, "  LopHocPhanSlices getLopHocPhanOfSinhVien(string ma)")
 	fmt.Fprintln(os.Stderr, "  SinhVienSlices getSinhVienLHP(string maLHP)")
 	fmt.Fprintln(os.Stderr, "  i32 delLopHP(string maLHP)")
 	fmt.Fprintln(os.Stderr, "  i32 putSVOutLopHP(string maLHP, string maSV)")
-	fmt.Fprintln(os.Stderr, "  i32 putSinhVien(SinhVien sv)")
+	fmt.Fprintln(os.Stderr, "  i32 addSinhVien(SinhVien sv)")
 	fmt.Fprintln(os.Stderr, "  i32 existsSinhVien(string maSV)")
 	fmt.Fprintln(os.Stderr, "  SinhVien getSinhVien(string maSV)")
 	fmt.Fprintln(os.Stderr, "  i32 delSinhVien(string maSV)")
 	fmt.Fprintln(os.Stderr, "  SinhVienSlices searchSinhVien(string key)")
+	fmt.Fprintln(os.Stderr, "  i32 UpdateSinhVien(SinhVien sv)")
+	fmt.Fprintln(os.Stderr, "  i32 UpdateLopHP(LopHocPhan lhp)")
 	fmt.Fprintln(os.Stderr)
 	os.Exit(0)
 }
@@ -168,29 +171,29 @@ func main() {
 		fmt.Print(client.Init(context.Background()))
 		fmt.Print("\n")
 		break
-	case "putLopHP":
+	case "addLopHP":
 		if flag.NArg()-1 != 1 {
-			fmt.Fprintln(os.Stderr, "PutLopHP requires 1 args")
+			fmt.Fprintln(os.Stderr, "AddLopHP requires 1 args")
 			flag.Usage()
 		}
-		arg39 := flag.Arg(1)
-		mbTrans40 := thrift.NewTMemoryBufferLen(len(arg39))
-		defer mbTrans40.Close()
-		_, err41 := mbTrans40.WriteString(arg39)
-		if err41 != nil {
+		arg46 := flag.Arg(1)
+		mbTrans47 := thrift.NewTMemoryBufferLen(len(arg46))
+		defer mbTrans47.Close()
+		_, err48 := mbTrans47.WriteString(arg46)
+		if err48 != nil {
 			Usage()
 			return
 		}
-		factory42 := thrift.NewTJSONProtocolFactory()
-		jsProt43 := factory42.GetProtocol(mbTrans40)
+		factory49 := thrift.NewTJSONProtocolFactory()
+		jsProt50 := factory49.GetProtocol(mbTrans47)
 		argvalue0 := apiservice.NewLopHocPhan()
-		err44 := argvalue0.Read(jsProt43)
-		if err44 != nil {
+		err51 := argvalue0.Read(jsProt50)
+		if err51 != nil {
 			Usage()
 			return
 		}
 		value0 := argvalue0
-		fmt.Print(client.PutLopHP(context.Background(), value0))
+		fmt.Print(client.AddLopHP(context.Background(), value0))
 		fmt.Print("\n")
 		break
 	case "addSinhVienVaoLop":
@@ -198,22 +201,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "AddSinhVienVaoLop requires 2 args")
 			flag.Usage()
 		}
-		arg45 := flag.Arg(1)
-		mbTrans46 := thrift.NewTMemoryBufferLen(len(arg45))
-		defer mbTrans46.Close()
-		_, err47 := mbTrans46.WriteString(arg45)
-		if err47 != nil {
-			Usage()
-			return
-		}
-		factory48 := thrift.NewTJSONProtocolFactory()
-		jsProt49 := factory48.GetProtocol(mbTrans46)
-		argvalue0 := apiservice.NewSinhVien()
-		err50 := argvalue0.Read(jsProt49)
-		if err50 != nil {
-			Usage()
-			return
-		}
+		argvalue0 := flag.Arg(1)
 		value0 := argvalue0
 		argvalue1 := flag.Arg(2)
 		value1 := argvalue1
@@ -225,19 +213,19 @@ func main() {
 			fmt.Fprintln(os.Stderr, "AddSinhVienSlicesVaoLop requires 2 args")
 			flag.Usage()
 		}
-		arg52 := flag.Arg(1)
-		mbTrans53 := thrift.NewTMemoryBufferLen(len(arg52))
-		defer mbTrans53.Close()
-		_, err54 := mbTrans53.WriteString(arg52)
-		if err54 != nil {
+		arg54 := flag.Arg(1)
+		mbTrans55 := thrift.NewTMemoryBufferLen(len(arg54))
+		defer mbTrans55.Close()
+		_, err56 := mbTrans55.WriteString(arg54)
+		if err56 != nil {
 			Usage()
 			return
 		}
-		factory55 := thrift.NewTJSONProtocolFactory()
-		jsProt56 := factory55.GetProtocol(mbTrans53)
+		factory57 := thrift.NewTJSONProtocolFactory()
+		jsProt58 := factory57.GetProtocol(mbTrans55)
 		containerStruct0 := apiservice.NewManagerStudentAddSinhVienSlicesVaoLopArgs()
-		err57 := containerStruct0.ReadField1(jsProt56)
-		if err57 != nil {
+		err59 := containerStruct0.ReadField1(jsProt58)
+		if err59 != nil {
 			Usage()
 			return
 		}
@@ -288,6 +276,16 @@ func main() {
 		fmt.Print(client.GetLopHocPhanSlice(context.Background()))
 		fmt.Print("\n")
 		break
+	case "getLopHocPhanOfSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "GetLopHocPhanOfSinhVien requires 1 args")
+			flag.Usage()
+		}
+		argvalue0 := flag.Arg(1)
+		value0 := argvalue0
+		fmt.Print(client.GetLopHocPhanOfSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
 	case "getSinhVienLHP":
 		if flag.NArg()-1 != 1 {
 			fmt.Fprintln(os.Stderr, "GetSinhVienLHP requires 1 args")
@@ -320,29 +318,29 @@ func main() {
 		fmt.Print(client.PutSVOutLopHP(context.Background(), value0, value1))
 		fmt.Print("\n")
 		break
-	case "putSinhVien":
+	case "addSinhVien":
 		if flag.NArg()-1 != 1 {
-			fmt.Fprintln(os.Stderr, "PutSinhVien requires 1 args")
+			fmt.Fprintln(os.Stderr, "AddSinhVien requires 1 args")
 			flag.Usage()
 		}
-		arg67 := flag.Arg(1)
-		mbTrans68 := thrift.NewTMemoryBufferLen(len(arg67))
-		defer mbTrans68.Close()
-		_, err69 := mbTrans68.WriteString(arg67)
-		if err69 != nil {
-			Usage()
-			return
-		}
-		factory70 := thrift.NewTJSONProtocolFactory()
-		jsProt71 := factory70.GetProtocol(mbTrans68)
-		argvalue0 := apiservice.NewSinhVien()
-		err72 := argvalue0.Read(jsProt71)
+		arg70 := flag.Arg(1)
+		mbTrans71 := thrift.NewTMemoryBufferLen(len(arg70))
+		defer mbTrans71.Close()
+		_, err72 := mbTrans71.WriteString(arg70)
 		if err72 != nil {
 			Usage()
 			return
 		}
+		factory73 := thrift.NewTJSONProtocolFactory()
+		jsProt74 := factory73.GetProtocol(mbTrans71)
+		argvalue0 := apiservice.NewSinhVien()
+		err75 := argvalue0.Read(jsProt74)
+		if err75 != nil {
+			Usage()
+			return
+		}
 		value0 := argvalue0
-		fmt.Print(client.PutSinhVien(context.Background(), value0))
+		fmt.Print(client.AddSinhVien(context.Background(), value0))
 		fmt.Print("\n")
 		break
 	case "existsSinhVien":
@@ -383,6 +381,56 @@ func main() {
 		argvalue0 := flag.Arg(1)
 		value0 := argvalue0
 		fmt.Print(client.SearchSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "UpdateSinhVien":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "UpdateSinhVien requires 1 args")
+			flag.Usage()
+		}
+		arg80 := flag.Arg(1)
+		mbTrans81 := thrift.NewTMemoryBufferLen(len(arg80))
+		defer mbTrans81.Close()
+		_, err82 := mbTrans81.WriteString(arg80)
+		if err82 != nil {
+			Usage()
+			return
+		}
+		factory83 := thrift.NewTJSONProtocolFactory()
+		jsProt84 := factory83.GetProtocol(mbTrans81)
+		argvalue0 := apiservice.NewSinhVien()
+		err85 := argvalue0.Read(jsProt84)
+		if err85 != nil {
+			Usage()
+			return
+		}
+		value0 := argvalue0
+		fmt.Print(client.UpdateSinhVien(context.Background(), value0))
+		fmt.Print("\n")
+		break
+	case "UpdateLopHP":
+		if flag.NArg()-1 != 1 {
+			fmt.Fprintln(os.Stderr, "UpdateLopHP requires 1 args")
+			flag.Usage()
+		}
+		arg86 := flag.Arg(1)
+		mbTrans87 := thrift.NewTMemoryBufferLen(len(arg86))
+		defer mbTrans87.Close()
+		_, err88 := mbTrans87.WriteString(arg86)
+		if err88 != nil {
+			Usage()
+			return
+		}
+		factory89 := thrift.NewTJSONProtocolFactory()
+		jsProt90 := factory89.GetProtocol(mbTrans87)
+		argvalue0 := apiservice.NewLopHocPhan()
+		err91 := argvalue0.Read(jsProt90)
+		if err91 != nil {
+			Usage()
+			return
+		}
+		value0 := argvalue0
+		fmt.Print(client.UpdateLopHP(context.Background(), value0))
 		fmt.Print("\n")
 		break
 	case "":
