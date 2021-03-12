@@ -191,7 +191,7 @@ func (p *ManagerStudentHandler) AddSinhVienVaoLop(ctx context.Context, sv string
 		}
 		return -2, err
 	} else {
-		if re, _ := p.ExistsSinhVienTrongLop(ctx, maLHP, sv); re != 1 {
+		if re, _ := p.ExistsSinhVienTrongLop(ctx, maLHP, sv); re != -1 {
 			log.Println("Sinh vien chua ton tai trong lop")
 			temp, err := client.BsGetItem(ctx, "DanhSachSinhVienLopHocPhan", []byte(maLHP))
 			if err != nil {

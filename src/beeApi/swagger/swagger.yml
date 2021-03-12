@@ -351,8 +351,8 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  models.&{437 SinhVien}:
-    title: '&{437 SinhVien}'
+  models.&{433 SinhVien}:
+    title: '&{433 SinhVien}'
     type: object
   models.LopHocPhan:
     title: LopHocPhan
@@ -396,7 +396,7 @@ definitions:
     title: SinhVienSlices
     type: array
     items:
-      $ref: '#/definitions/models.&{437 SinhVien}'
+      $ref: '#/definitions/models.&{433 SinhVien}'
   models.SinhVienVaLop:
     title: SinhVienVaLop
     type: object

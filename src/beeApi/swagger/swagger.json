@@ -536,8 +536,8 @@
         }
     },
     "definitions": {
-        "models.\u0026{437 SinhVien}": {
-            "title": "\u0026{437 SinhVien}",
+        "models.\u0026{433 SinhVien}": {
+            "title": "\u0026{433 SinhVien}",
             "type": "object"
         },
         "models.LopHocPhan": {
@@ -600,7 +600,7 @@
             "title": "SinhVienSlices",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/models.\u0026{437 SinhVien}"
+                "$ref": "#/definitions/models.\u0026{433 SinhVien}"
             }
         },
         "models.SinhVienVaLop": {
