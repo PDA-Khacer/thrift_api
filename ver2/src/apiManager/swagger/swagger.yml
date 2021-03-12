@@ -1,0 +1,265 @@
+swagger: "2.0"
+info:
+  title: beego Test API
+  description: beego has a very cool tools to autogenerate documents for your API
+  version: 1.0.0
+  termsOfService: http://beego.me/
+  contact:
+    email: astaxie@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /classC/:
+    put:
+      tags:
+      - classC
+      description: create users
+      operationId: ClassCController.UpdateClass
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.ClassInfor'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+    delete:
+      tags:
+      - classC
+      description: create users
+      operationId: ClassCController.DeleteClassC
+      parameters:
+      - in: path
+        name: id
+        description: body for sinhvien content
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /classC/{id}:
+    get:
+      tags:
+      - classC
+      description: create users
+      operationId: ClassCController.GetClass
+      parameters:
+      - in: path
+        name: id
+        description: body for sinhvien content
+        required: true
+        type: string
+      responses:
+        "200":
+          description: models.ClassC
+        "403":
+          description: body is empty
+  /classC/all:
+    get:
+      tags:
+      - classC
+      description: create users
+      operationId: ClassCController.GetAllClass
+      responses:
+        "200":
+          description: models.ClassCSlice
+        "403":
+          description: body is empty
+  /classC/create:
+    post:
+      tags:
+      - classC
+      description: create users
+      operationId: ClassCController.CreateClassC
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.ClassC'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /student/:
+    put:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.UpdateStudent
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.StudentInfor'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /student/{id}:
+    get:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.GetStudent
+      parameters:
+      - in: path
+        name: id
+        description: body for sinhvien content
+        required: true
+        type: string
+      responses:
+        "200":
+          description: models.Student
+        "403":
+          description: body is empty
+    delete:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.DeleteStudent
+      parameters:
+      - in: path
+        name: id
+        description: body for sinhvien content
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /student/AddToClass:
+    put:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.AddStudentToClass
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.StudentClassC'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /student/AllClass: {}
+  /student/AllStudent: {}
+  /student/OutClass:
+    delete:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.RemoveStudentOutClass
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.StudentClassC'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+  /student/all:
+    get:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.GetAllStudent
+      responses:
+        "200":
+          description: models.StudentSlice
+        "403":
+          description: body is empty
+  /student/create:
+    post:
+      tags:
+      - student
+      description: create users
+      operationId: StudentController.CreateStudent
+      parameters:
+      - in: body
+        name: body
+        description: body for sinhvien content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Student'
+      responses:
+        "200":
+          description: '{int} 1'
+        "403":
+          description: body is empty
+definitions:
+  models.ClassC:
+    title: ClassC
+    type: object
+    properties:
+      AllStudent:
+        type: array
+        items:
+          type: string
+      Infor:
+        $ref: '#/definitions/models.ClassInfor'
+  models.ClassInfor:
+    title: ClassInfor
+    type: object
+    properties:
+      ID:
+        type: string
+      Name:
+        type: string
+      Teacher:
+        type: string
+  models.Student:
+    title: Student
+    type: object
+    properties:
+      AllClass:
+        type: array
+        items:
+          type: string
+      Infor:
+        $ref: '#/definitions/models.StudentInfor'
+  models.StudentClassC:
+    title: StudentClassC
+    type: object
+    properties:
+      ClassId:
+        type: string
+      StudentId:
+        type: string
+  models.StudentInfor:
+    title: StudentInfor
+    type: object
+    properties:
+      Brith:
+        type: string
+      Gender:
+        type: integer
+        format: int32
+      ID:
+        type: string
+      Name:
+        type: string
+      Phone:
+        type: string
